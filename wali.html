@@ -12,14 +12,15 @@
     h1 { font-size: 20px; margin: 0 0 4px; }
     h2 { font-size: 16px; margin: 0 0 10px; }
     .muted { color: #6b7280; font-size: 13px; margin: 0; }
-    label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
-    input, button {
+    label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+    input, select, button {
       width: 100%; padding: 12px; border-radius: 10px;
-      border: 1px solid #d1d5db; font-size: 15px;
+      border: 1px solid #d1d5db; font-size: 15px; background: #fff;
     }
     button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 14px; }
     button:hover { opacity: 0.92; }
     button.secondary { background: #e5e7eb; color: #111827; margin-top: 8px; }
+    button.wa-btn { background: #15803d; color: #fff; margin-top: 8px; }
     .saldo-banner {
       background: #141414; color: #fff; border-radius: 14px; padding: 18px; margin-top: 12px;
     }
@@ -36,18 +37,20 @@
     .trx-amount { font-weight: 700; font-size: 14px; text-align: right; white-space: nowrap; }
     .in { color: #15803d; }
     .out { color: #b91c1c; }
-    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; background: #fee2e2; color: #991b1b; display: none; }
+    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; display: none; }
+    .alert.err { background: #fee2e2; color: #991b1b; }
+    .alert.ok { background: #dcfce7; color: #166534; }
     .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #dcfce7; color: #166534; }
     .badge.blocked { background: #fee2e2; color: #991b1b; }
+    .badge.pending { background: #fef3c7; color: #92400e; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- FORM LOGIN -->
     <div id="loginBox" class="card">
       <h1>Portal Wali Santri</h1>
-      <p class="muted">Pantau saldo tabungan dan riwayat transaksi anak secara real-time</p>
+      <p class="muted">Pantau saldo tabungan, ajukan top-up, dan cek riwayat transaksi anak</p>
 
       <label for="loginNis">NIS Santri</label>
       <input type="text" id="loginNis" placeholder="Contoh: 2026001" />
@@ -56,10 +59,9 @@
       <input type="password" id="loginPin" inputmode="numeric" maxlength="8" placeholder="Masukkan PIN" />
 
       <button type="button" onclick="loginWali()">Masuk & Cek Saldo</button>
-      <div id="loginErr" class="alert"></div>
+      <div id="loginErr" class="alert err"></div>
     </div>
 
-    <!-- DASHBOARD SANTRI -->
     <div id="dashBox" style="display: none;">
       <div class="card">
         <div class="topbar">
@@ -85,6 +87,36 @@
         </div>
       </div>
 
+      <!-- FORM TOP-UP SALDO ANAK -->
+      <div class="card">
+        <h2>Top-Up Saldo Anak</h2>
+        <p class="muted">Kirim pengajuan top-up setelah transfer; saldo masuk setelah diverifikasi petugas.</p>
+
+        <label for="topupNominal">Nominal Top-Up (Rp)</label>
+        <input type="number" id="topupNominal" min="1000" step="1000" placeholder="Contoh: 50000" />
+
+        <label for="topupMetode">Metode Pembayaran</label>
+        <select id="topupMetode">
+          <option value="Transfer Bank">Transfer Bank</option>
+          <option value="QRIS / E-Wallet (DANA/OVO/GoPay)">QRIS / E-Wallet (DANA/OVO/GoPay)</option>
+          <option value="Titip Tunai Pengurus">Titip Tunai Pengurus</option>
+        </select>
+
+        <label for="topupCatatan">Catatan / Nama Pengirim / Bukti</label>
+        <input type="text" id="topupCatatan" placeholder="Contoh: a.n. Ibu Siti jam 06.15" />
+
+        <button type="button" onclick="submitTopup()">Ajukan Top-Up</button>
+        <button type="button" class="wa-btn" onclick="kirimWaTopup()">Konfirmasi via WhatsApp Bendahara</button>
+        <div id="topupMsg" class="alert"></div>
+      </div>
+
+      <!-- RIWAYAT PENGAJUAN TOP-UP -->
+      <div class="card">
+        <h2>Status Pengajuan Top-Up</h2>
+        <div id="topupList"></div>
+      </div>
+
+      <!-- RIWAYAT TRANSAKSI -->
       <div class="card">
         <h2>Riwayat Transaksi Terakhir</h2>
         <div id="trxList"></div>
@@ -94,15 +126,24 @@
 
   <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
+    const WA_BENDAHARA = ''; // Opsional: isi nomor WA bendahara format 628... agar tombol WA langsung terbuka
     let sessionAuth = null;
+    let currentSantri = null;
 
     function rupiah(n) {
       return 'Rp' + Number(n || 0).toLocaleString('id-ID');
     }
 
-    function showErr(msg) {
+    function showLoginErr(msg) {
       const el = document.getElementById('loginErr');
       el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function showTopupMsg(msg, isOk = true) {
+      const el = document.getElementById('topupMsg');
+      el.textContent = msg;
+      el.className = 'alert ' + (isOk ? 'ok' : 'err');
       el.style.display = 'block';
     }
 
@@ -112,7 +153,7 @@
       document.getElementById('loginErr').style.display = 'none';
 
       if (!nis || !pin) {
-        return showErr('Masukkan NIS dan PIN terlebih dahulu.');
+        return showLoginErr('Masukkan NIS dan PIN terlebih dahulu.');
       }
 
       try {
@@ -122,18 +163,19 @@
 
         if (!data.ok) {
           sessionStorage.removeItem('wali_auth');
-          return showErr(data.message || 'Gagal masuk.');
+          return showLoginErr(data.message || 'Gagal masuk.');
         }
 
         sessionAuth = { nis, pin };
         sessionStorage.setItem('wali_auth', JSON.stringify(sessionAuth));
-        renderDashboard(data.santri, data.riwayat || []);
+        renderDashboard(data.santri, data.riwayat || [], data.topup || []);
       } catch (err) {
-        showErr('Gagal menghubungi server: ' + err.message);
+        showLoginErr('Gagal menghubungi server: ' + err.message);
       }
     }
 
-    function renderDashboard(s, riwayat) {
+    function renderDashboard(s, riwayat, topup) {
+      currentSantri = s;
       document.getElementById('loginBox').style.display = 'none';
       document.getElementById('dashBox').style.display = 'block';
 
@@ -147,6 +189,25 @@
       const badge = document.getElementById('dStatus');
       badge.textContent = s.status;
       badge.className = 'badge' + (s.status !== 'AKTIF' ? ' blocked' : '');
+
+      const topupEl = document.getElementById('topupList');
+      if (!topup.length) {
+        topupEl.innerHTML = '<p class="muted">Belum ada pengajuan top-up.</p>';
+      } else {
+        topupEl.innerHTML = topup.map(t => {
+          const st = (t.status || 'MENUNGGU').toUpperCase();
+          const stClass = st === 'DISETUJUI' ? 'in' : (st === 'DITOLAK' ? 'out' : '');
+          return `
+            <div class="trx-item">
+              <div>
+                <div class="trx-title">${t.metode || 'Top-Up'} • <span class="${stClass}">${st}</span></div>
+                <div class="trx-sub">${t.waktu}${t.catatan ? ' • ' + t.catatan : ''}</div>
+              </div>
+              <div class="trx-amount">${rupiah(t.nominal)}</div>
+            </div>
+          `;
+        }).join('');
+      }
 
       const listEl = document.getElementById('trxList');
       if (!riwayat.length) {
@@ -170,12 +231,70 @@
       }).join('');
     }
 
+    async function submitTopup() {
+      if (!sessionAuth) return;
+      const nominal = Number(document.getElementById('topupNominal').value || 0);
+      const metode = document.getElementById('topupMetode').value;
+      const catatan = document.getElementById('topupCatatan').value.trim();
+
+      if (!nominal || nominal <= 0) {
+        return showTopupMsg('Masukkan nominal top-up yang valid.', false);
+      }
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'ajukanTopup',
+            nis: sessionAuth.nis,
+            pin: sessionAuth.pin,
+            nominal: nominal,
+            metode: metode,
+            catatan: catatan
+          })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          return showTopupMsg(data.message || 'Gagal mengajukan top-up.', false);
+        }
+
+        document.getElementById('topupNominal').value = '';
+        document.getElementById('topupCatatan').value = '';
+        showTopupMsg(`${data.message} (ID: ${data.id_topup})`, true);
+        refreshData();
+      } catch (err) {
+        showTopupMsg('Error mengirim pengajuan: ' + err.message, false);
+      }
+    }
+
+    function kirimWaTopup() {
+      const nominal = Number(document.getElementById('topupNominal').value || 0);
+      const metode = document.getElementById('topupMetode').value;
+      const catatan = document.getElementById('topupCatatan').value.trim();
+      const nama = currentSantri ? currentSantri.nama : '-';
+      const nis = sessionAuth ? sessionAuth.nis : '-';
+
+      const teks = [
+        'Assalamu\'alaikum, konfirmasi *Top-Up Saldo ATM Santri*:',
+        `• Nama: ${nama} (NIS: ${nis})`,
+        `• Nominal: ${nominal ? rupiah(nominal) : '-'}`,
+        `• Metode: ${metode}`,
+        catatan ? `• Catatan: ${catatan}` : ''
+      ].filter(Boolean).join('\n');
+
+      const waUrl = WA_BENDAHARA
+        ? `https://wa.me/${WA_BENDAHARA}?text=${encodeURIComponent(teks)}`
+        : `https://wa.me/?text=${encodeURIComponent(teks)}`;
+      window.open(waUrl, '_blank');
+    }
+
     function refreshData() {
       if (sessionAuth) loginWali(sessionAuth.nis, sessionAuth.pin);
     }
 
     function logoutWali() {
       sessionAuth = null;
+      currentSantri = null;
       sessionStorage.removeItem('wali_auth');
       document.getElementById('loginPin').value = '';
       document.getElementById('dashBox').style.display = 'none';
