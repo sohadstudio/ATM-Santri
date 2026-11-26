@@ -54,9 +54,9 @@
 
     .login-hero {
       position: relative;
-      background: linear-gradient(155deg, rgba(6, 78, 59, 0.92) 0%, rgba(5, 150, 105, 0.88) 100%);
+      background: linear-gradient(155deg, rgba(6, 78, 59, 0.94) 0%, rgba(5, 150, 105, 0.9) 100%);
       color: #ffffff;
-      padding: 34px 22px 42px;
+      padding: 32px 22px 40px;
       text-align: center;
       border-bottom-left-radius: 28px;
       border-bottom-right-radius: 28px;
@@ -77,16 +77,25 @@
       z-index: 1;
     }
 
-    .pondok-logo-sample {
-      width: 68px;
-      height: 68px;
+    .pondok-logo-wrap {
+      width: 84px;
+      height: 84px;
       margin: 0 auto 12px;
-      border-radius: 20px;
+      border-radius: 22px;
       background: rgba(255, 255, 255, 0.16);
       border: 1.5px solid rgba(255, 255, 255, 0.35);
       display: grid;
       place-items: center;
+      overflow: hidden;
       backdrop-filter: blur(4px);
+    }
+
+    .pondok-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 5px;
+      display: block;
     }
 
     .login-badge-pill {
@@ -246,17 +255,24 @@
       gap: 12px;
     }
 
-    .brand-badge {
-      width: 44px;
-      height: 44px;
+    .header-logo-box {
+      width: 46px;
+      height: 46px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.28);
       display: grid;
       place-items: center;
-      font-weight: 800;
-      font-size: 15px;
+      overflow: hidden;
       flex-shrink: 0;
+    }
+
+    .header-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 3px;
+      display: block;
     }
 
     .brand-title {
@@ -597,14 +613,6 @@
       border: 1px solid #fecaca;
     }
 
-    .dashboard-footer {
-      text-align: center;
-      padding: 8px 16px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -645,14 +653,8 @@
     <div>
       <div class="login-hero">
         <div class="login-hero-inner">
-          <!-- Logo Pondok Sampel -->
-          <div class="pondok-logo-sample" aria-label="Logo Pondok Sampel">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L9.5 5.5H14.5L12 2Z" />
-              <path d="M6 11C6 8.2 8.7 6 12 6C15.3 6 18 8.2 18 11V20H6V11Z" />
-              <path d="M3 20H21" />
-              <path d="M10 20V15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15V20" />
-            </svg>
+          <div class="pondok-logo-wrap">
+            <img class="ponpes-logo-img" src="https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png" alt="Logo PPS. NU Raden Keunyeup" />
           </div>
           <div class="login-badge-pill">Portal Wali Santri</div>
           <h1 class="login-pondok-name">PPS. NU Raden Keunyeup</h1>
@@ -692,7 +694,9 @@
     <header class="top-header">
       <div class="brand-row">
         <div class="brand-left">
-          <div class="brand-badge">NU</div>
+          <div class="header-logo-box">
+            <img class="ponpes-logo-img" src="https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png" alt="Logo PPS. NU Raden Keunyeup" />
+          </div>
           <div>
             <div class="brand-title">PPS. NU Raden Keunyeup</div>
             <div class="brand-sub">Tahun Ajaran 2026-2027</div>
@@ -822,8 +826,6 @@
           <span id="detailStatus" class="item-title">AKTIF</span>
         </div>
       </div>
-
-      <footer class="dashboard-footer">Powered by Sohad Studio</footer>
     </main>
 
     <nav class="bottom-nav">
@@ -845,10 +847,23 @@
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
     const WA_PENGURUS = '6285111311421';
+    const LOGO_PONPES_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png';
+    const LOGO_PONPES_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png?raw=true';
 
     let session = { nis: '', pin: '' };
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+    function initPonpesLogo() {
+      document.querySelectorAll('.ponpes-logo-img').forEach((img) => {
+        img.onerror = () => {
+          if (img.src !== LOGO_PONPES_FALLBACK) {
+            img.src = LOGO_PONPES_FALLBACK;
+          }
+        };
+        img.src = LOGO_PONPES_URL;
+      });
+    }
 
     function showAlert(el, msg, isOk) {
       el.textContent = msg;
@@ -994,6 +1009,8 @@
       if (!json.ok) throw new Error(json.message || 'Gagal memuat data.');
       return json;
     }
+
+    initPonpesLogo();
 
     document.getElementById('togglePin').addEventListener('change', (e) => {
       document.getElementById('inputPin').type = e.target.checked ? 'text' : 'password';
