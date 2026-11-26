@@ -3,312 +3,793 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATM Santri - Portal Wali Santri</title>
+  <title>Portal Wali Santri — PPS. NU Raden Keunyeup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #f3f4f6; color: #111827; padding: 16px; }
-    .container { max-width: 480px; margin: 0 auto; }
-    .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    h2 { font-size: 16px; margin: 0 0 10px; }
-    .muted { color: #6b7280; font-size: 13px; margin: 0; }
-    label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
-    input, select, button {
-      width: 100%; padding: 12px; border-radius: 10px;
-      border: 1px solid #d1d5db; font-size: 15px; background: #fff;
+    :root {
+      --green-dark: #065f46;
+      --green-main: #059669;
+      --green-light: #ecfdf5;
+      --green-border: #a7f3d0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --danger: #dc2626;
+      --warn: #d97706;
     }
-    button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 14px; }
-    button:hover { opacity: 0.92; }
-    button.secondary { background: #e5e7eb; color: #111827; margin-top: 8px; }
-    button.wa-btn { background: #15803d; color: #fff; margin-top: 8px; }
-    .saldo-banner {
-      background: #141414; color: #fff; border-radius: 14px; padding: 18px; margin-top: 12px;
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    .saldo-label { font-size: 12px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.05em; }
-    .saldo-val { font-size: 28px; font-weight: 700; margin: 4px 0 10px; }
-    .meta-row { display: flex; justify-content: space-between; font-size: 13px; color: #d4d4d8; border-top: 1px solid #27272a; padding-top: 10px; }
-    .trx-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 10px;
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding-bottom: 84px;
     }
-    .trx-item:last-child { border-bottom: none; }
-    .trx-title { font-weight: 600; font-size: 14px; }
-    .trx-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
-    .trx-amount { font-weight: 700; font-size: 14px; text-align: right; white-space: nowrap; }
-    .in { color: #15803d; }
-    .out { color: #b91c1c; }
-    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; display: none; }
-    .alert.err { background: #fee2e2; color: #991b1b; }
-    .alert.ok { background: #dcfce7; color: #166534; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #dcfce7; color: #166534; }
-    .badge.blocked { background: #fee2e2; color: #991b1b; }
-    .badge.pending { background: #fef3c7; color: #92400e; }
+
+    .app-shell {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* Top Header */
+    .top-header {
+      background: linear-gradient(145deg, #064e3b 0%, #059669 100%);
+      color: #ffffff;
+      padding: 20px 18px 68px;
+      border-bottom-left-radius: 26px;
+      border-bottom-right-radius: 26px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.82);
+      margin-top: 2px;
+    }
+
+    .btn-ghost-sm {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .greeting-box {
+      margin-top: 18px;
+    }
+
+    .greeting-salutation {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .greeting-name {
+      font-size: 19px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    /* Main Content Container */
+    .main-content {
+      padding: 0 16px;
+      margin-top: -46px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    /* Login Card */
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .input-control,
+    .select-control {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .input-control:focus,
+    .select-control:focus {
+      border-color: var(--green-main);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 13px;
+      background: var(--green-main);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--green-dark);
+    }
+
+    /* Santri Profile Card */
+    .profile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .profile-info-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      background: var(--green-light);
+      border: 2px solid var(--green-border);
+      color: var(--green-dark);
+      font-weight: 800;
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .santri-name {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .santri-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .pill-status {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--green-border);
+      white-space: nowrap;
+    }
+
+    .pill-status.blokir {
+      background: #fef2f2;
+      color: var(--danger);
+      border-color: #fecaca;
+    }
+
+    /* 2 Summary Cards (Poin Adab Dihapus) */
+    .summary-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .summary-box {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 12px;
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .summary-value {
+      font-size: 17px;
+      font-weight: 800;
+      margin-top: 5px;
+      color: var(--green-dark);
+    }
+
+    .summary-value.tunggakan {
+      color: var(--ink);
+    }
+
+    /* Quick Action Buttons */
+    .action-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-outline-green {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--green-main);
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-outline-slate {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Segmented Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--green-main);
+      color: #ffffff;
+      border-color: var(--green-main);
+    }
+
+    /* List Items */
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-title {
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    .item-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .item-right {
+      text-align: right;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge-soft {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--green-light);
+      color: var(--green-dark);
+    }
+
+    .badge-soft.pending {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .badge-soft.rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .alert-box {
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .alert-box.show {
+      display: block;
+    }
+
+    .alert-box.ok {
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--green-border);
+    }
+
+    .alert-box.err {
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px 6px 10px;
+      z-index: 30;
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--green-main);
+    }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="loginBox" class="card">
-      <h1>Portal Wali Santri</h1>
-      <p class="muted">Pantau saldo tabungan, ajukan top-up, dan cek riwayat transaksi anak</p>
-
-      <label for="loginNis">NIS Santri</label>
-      <input type="text" id="loginNis" placeholder="Contoh: 2026001" />
-
-      <label for="loginPin">PIN Santri / Wali</label>
-      <input type="password" id="loginPin" inputmode="numeric" maxlength="8" placeholder="Masukkan PIN" />
-
-      <button type="button" onclick="loginWali()">Masuk & Cek Saldo</button>
-      <div id="loginErr" class="alert err"></div>
-    </div>
-
-    <div id="dashBox" style="display: none;">
-      <div class="card">
-        <div class="topbar">
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="brand-row">
+        <div class="brand-left">
+          <div class="brand-badge">NU</div>
           <div>
-            <h1 id="dNama">-</h1>
-            <p class="muted"><span id="dKamar">-</span> • NIS <span id="dNis">-</span></p>
-          </div>
-          <span id="dStatus" class="badge">AKTIF</span>
-        </div>
-
-        <div class="saldo-banner">
-          <div class="saldo-label">Saldo Tabungan Aktif</div>
-          <div class="saldo-val" id="dSaldo">Rp0</div>
-          <div class="meta-row">
-            <span>Limit Harian: <strong id="dLimitHarian">Rp0</strong></span>
-            <span>Sisa Hari Ini: <strong id="dSisaLimit">Rp0</strong></span>
+            <div class="brand-title">PPS. NU Raden Keunyeup</div>
+            <div class="brand-sub">Powered by Sohad Studio</div>
           </div>
         </div>
+        <button id="btnLogout" class="btn-ghost-sm hidden" type="button">Keluar</button>
+      </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 10px;">
-          <button type="button" class="secondary" onclick="refreshData()">Muat Ulang</button>
-          <button type="button" class="secondary" onclick="logoutWali()">Keluar</button>
+      <div class="greeting-box">
+        <div class="greeting-salutation">Assalamualaikum wr. wb.,</div>
+        <div id="greetingTitle" class="greeting-name">Wali Santri</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Login Card -->
+      <section id="loginSection" class="card">
+        <h2 style="font-size: 15px; font-weight: 800; margin-bottom: 10px;">Masuk Portal Wali Santri</h2>
+        <form id="loginForm">
+          <div class="field-group">
+            <label class="field-label" for="inputNis">Nomor Induk Santri (NIS)</label>
+            <input id="inputNis" class="input-control" type="text" placeholder="Contoh: 2026001" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="inputPin">PIN Santri</label>
+            <input id="inputPin" class="input-control" type="password" placeholder="Masukkan PIN" required />
+          </div>
+          <button class="btn-primary" type="submit">Lihat Data Santri</button>
+        </form>
+        <div id="loginAlert" class="alert-box"></div>
+      </section>
+
+      <!-- Dashboard Section -->
+      <section id="dashboardSection" class="hidden">
+        <!-- Profil & 2 Kartu Ringkasan (Sisa Jajan & Tunggakan) -->
+        <div class="card">
+          <div class="profile-top">
+            <div class="profile-info-wrap">
+              <div id="santriAvatar" class="avatar">MS</div>
+              <div>
+                <div id="santriNama" class="santri-name">-</div>
+                <div id="santriMeta" class="santri-meta">NIS: - • Kamar: -</div>
+              </div>
+            </div>
+            <span id="santriStatusBadge" class="pill-status">AKTIF</span>
+          </div>
+
+          <div class="summary-grid-2">
+            <div class="summary-box">
+              <div class="summary-label">SISA JAJAN</div>
+              <div id="valSisaJajan" class="summary-value">Rp 0</div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-label">TUNGGAKAN</div>
+              <div id="valTunggakan" class="summary-value tunggakan">Rp 0</div>
+            </div>
+          </div>
+
+          <div class="action-row-2">
+            <button id="btnGoTopup" class="btn-outline-green" type="button">Isi Saldo</button>
+            <button id="btnWaPengasuh" class="btn-outline-slate" type="button">Pengasuh / Bendahara</button>
+          </div>
         </div>
-      </div>
 
-      <!-- FORM TOP-UP SALDO ANAK -->
-      <div class="card">
-        <h2>Top-Up Saldo Anak</h2>
-        <p class="muted">Kirim pengajuan top-up setelah transfer; saldo masuk setelah diverifikasi petugas.</p>
+        <!-- Tabs: Transaksi & Top-Up -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="transaksi" type="button">Transaksi</button>
+          <button class="tab-btn" data-tab="topup" type="button">Isi Saldo & Status</button>
+          <button class="tab-btn" data-tab="tagihan" type="button">Tagihan</button>
+        </div>
 
-        <label for="topupNominal">Nominal Top-Up (Rp)</label>
-        <input type="number" id="topupNominal" min="1000" step="1000" placeholder="Contoh: 50000" />
+        <!-- Tab: Riwayat Transaksi -->
+        <div id="panelTransaksi" class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="font-size: 14px; font-weight: 800;">Riwayat Transaksi Terakhir</h3>
+            <button id="btnRefresh" class="btn-ghost-sm" style="color:var(--green-dark); background:var(--green-light); border-color:var(--green-border);" type="button">Muat Ulang</button>
+          </div>
+          <div id="listTransaksi"></div>
+        </div>
 
-        <label for="topupMetode">Metode Pembayaran</label>
-        <select id="topupMetode">
-          <option value="Transfer Bank">Transfer Bank</option>
-          <option value="QRIS / E-Wallet (DANA/OVO/GoPay)">QRIS / E-Wallet (DANA/OVO/GoPay)</option>
-          <option value="Titip Tunai Pengurus">Titip Tunai Pengurus</option>
-        </select>
+        <!-- Tab: Top-Up -->
+        <div id="panelTopup" class="card hidden">
+          <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">Ajukan Top-Up Saldo</h3>
+          <form id="topupForm">
+            <div class="field-group">
+              <label class="field-label" for="topupNominal">Nominal Top-Up (Rp)</label>
+              <input id="topupNominal" class="input-control" type="number" min="1000" step="1000" placeholder="Contoh: 50000" required />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="topupMetode">Metode Pembayaran</label>
+              <select id="topupMetode" class="select-control">
+                <option value="Transfer Bank">Transfer Bank</option>
+                <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+                <option value="Titip Tunai Pengurus">Titip Tunai Pengurus</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="topupCatatan">Catatan / Nama Pengirim</label>
+              <input id="topupCatatan" class="input-control" type="text" placeholder="Contoh: a.n. Wali Santri" />
+            </div>
+            <button class="btn-primary" type="submit">Ajukan Top-Up</button>
+          </form>
+          <div id="topupAlert" class="alert-box"></div>
 
-        <label for="topupCatatan">Catatan / Nama Pengirim / Bukti</label>
-        <input type="text" id="topupCatatan" placeholder="Contoh: a.n. Ibu Siti jam 06.15" />
+          <hr style="border:none; border-top:1px solid var(--line); margin:16px 0;" />
+          <h4 style="font-size: 13px; font-weight: 800; margin-bottom: 6px;">Status Pengajuan Top-Up</h4>
+          <div id="listTopup"></div>
+        </div>
 
-        <button type="button" onclick="submitTopup()">Ajukan Top-Up</button>
-        <button type="button" class="wa-btn" onclick="kirimWaTopup()">Konfirmasi via WhatsApp Bendahara</button>
-        <div id="topupMsg" class="alert"></div>
-      </div>
+        <!-- Tab: Tagihan -->
+        <div id="panelTagihan" class="card hidden">
+          <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 6px;">Informasi Tagihan</h3>
+          <p style="font-size: 12.5px; color: var(--muted);">
+            Total tunggakan tercatat saat ini: <strong id="tagihanInfoNominal" style="color:var(--ink);">Rp 0</strong>.
+            Untuk konfirmasi administrasi pondok, silakan hubungi bendahara atau pengasuh.
+          </p>
+        </div>
+      </section>
+    </main>
 
-      <!-- RIWAYAT PENGAJUAN TOP-UP -->
-      <div class="card">
-        <h2>Status Pengajuan Top-Up</h2>
-        <div id="topupList"></div>
-      </div>
-
-      <!-- RIWAYAT TRANSAKSI -->
-      <div class="card">
-        <h2>Riwayat Transaksi Terakhir</h2>
-        <div id="trxList"></div>
-      </div>
-    </div>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-nav="beranda" type="button">
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" data-nav="tagihan" type="button">
+        <span>Tagihan</span>
+      </button>
+      <button class="nav-item" data-nav="topup" type="button">
+        <span>Isi Saldo</span>
+      </button>
+      <button class="nav-item" data-nav="profil" type="button">
+        <span>Profil</span>
+      </button>
+    </nav>
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
-    const WA_BENDAHARA = ''; // Opsional: isi nomor WA bendahara format 628... agar tombol WA langsung terbuka
-    let sessionAuth = null;
-    let currentSantri = null;
+    // Ganti dengan URL Web App Google Apps Script milikmu
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_GANTI_DENGAN_DEPLOYMENT_ID_KAMU/exec';
+    const WA_BENDAHARA = '6281234567890'; // Ganti nomor WA bendahara/pengasuh (format 62...)
 
-    function rupiah(n) {
-      return 'Rp' + Number(n || 0).toLocaleString('id-ID');
-    }
+    let session = { nis: '', pin: '' };
 
-    function showLoginErr(msg) {
-      const el = document.getElementById('loginErr');
+    const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+    function showAlert(el, msg, isOk) {
       el.textContent = msg;
-      el.style.display = 'block';
+      el.className = 'alert-box show ' + (isOk ? 'ok' : 'err');
     }
 
-    function showTopupMsg(msg, isOk = true) {
-      const el = document.getElementById('topupMsg');
-      el.textContent = msg;
-      el.className = 'alert ' + (isOk ? 'ok' : 'err');
-      el.style.display = 'block';
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.tab === tabName);
+      });
+      document.getElementById('panelTransaksi').classList.toggle('hidden', tabName !== 'transaksi');
+      document.getElementById('panelTopup').classList.toggle('hidden', tabName !== 'topup');
+      document.getElementById('panelTagihan').classList.toggle('hidden', tabName !== 'tagihan');
     }
 
-    async function loginWali(savedNis = null, savedPin = null) {
-      const nis = (savedNis || document.getElementById('loginNis').value).trim();
-      const pin = (savedPin || document.getElementById('loginPin').value).trim();
-      document.getElementById('loginErr').style.display = 'none';
+    function renderDashboard(data) {
+      const s = data.santri || {};
+      document.getElementById('greetingTitle').textContent = 'Wali dari ' + (s.nama || 'Santri');
+      document.getElementById('santriNama').textContent = s.nama || '-';
+      document.getElementById('santriMeta').textContent = 'NIS: ' + (s.nis || '-') + ' • ' + (s.kamar || '-');
 
-      if (!nis || !pin) {
-        return showLoginErr('Masukkan NIS dan PIN terlebih dahulu.');
-      }
+      const initials = (s.nama || 'S')
+        .split(' ')
+        .slice(0, 2)
+        .map((w) => w[0] || '')
+        .join('')
+        .toUpperCase();
+      document.getElementById('santriAvatar').textContent = initials || 'S';
 
-      try {
-        const url = `${GAS_URL}?action=waliLogin&nis=${encodeURIComponent(nis)}&pin=${encodeURIComponent(pin)}`;
-        const res = await fetch(url);
-        const data = await res.json();
+      const statusBadge = document.getElementById('santriStatusBadge');
+      const st = String(s.status || 'AKTIF').toUpperCase();
+      statusBadge.textContent = st;
+      statusBadge.classList.toggle('blokir', st !== 'AKTIF');
 
-        if (!data.ok) {
-          sessionStorage.removeItem('wali_auth');
-          return showLoginErr(data.message || 'Gagal masuk.');
-        }
+      // Sisa Jajan: utamakan sisa_limit bila ada, atau tampilkan saldo
+      const sisaJajan = typeof s.sisa_limit === 'number' ? s.sisa_limit : (s.saldo || 0);
+      const tunggakan = Number(s.tunggakan || 0);
 
-        sessionAuth = { nis, pin };
-        sessionStorage.setItem('wali_auth', JSON.stringify(sessionAuth));
-        renderDashboard(data.santri, data.riwayat || [], data.topup || []);
-      } catch (err) {
-        showLoginErr('Gagal menghubungi server: ' + err.message);
-      }
-    }
+      document.getElementById('valSisaJajan').textContent = formatRp(sisaJajan);
+      document.getElementById('valTunggakan').textContent = formatRp(tunggakan);
+      document.getElementById('tagihanInfoNominal').textContent = formatRp(tunggakan);
 
-    function renderDashboard(s, riwayat, topup) {
-      currentSantri = s;
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('dashBox').style.display = 'block';
-
-      document.getElementById('dNama').textContent = s.nama;
-      document.getElementById('dKamar').textContent = s.kamar;
-      document.getElementById('dNis').textContent = s.nis;
-      document.getElementById('dSaldo').textContent = rupiah(s.saldo);
-      document.getElementById('dLimitHarian').textContent = rupiah(s.limit_harian);
-      document.getElementById('dSisaLimit').textContent = rupiah(s.sisa_limit);
-
-      const badge = document.getElementById('dStatus');
-      badge.textContent = s.status;
-      badge.className = 'badge' + (s.status !== 'AKTIF' ? ' blocked' : '');
-
-      const topupEl = document.getElementById('topupList');
-      if (!topup.length) {
-        topupEl.innerHTML = '<p class="muted">Belum ada pengajuan top-up.</p>';
+      // Render Transaksi
+      const trxList = Array.isArray(data.riwayat) ? data.riwayat : [];
+      const trxEl = document.getElementById('listTransaksi');
+      if (!trxList.length) {
+        trxEl.innerHTML = '<p class="item-sub">Belum ada transaksi tercatat.</p>';
       } else {
-        topupEl.innerHTML = topup.map(t => {
-          const st = (t.status || 'MENUNGGU').toUpperCase();
-          const stClass = st === 'DISETUJUI' ? 'in' : (st === 'DITOLAK' ? 'out' : '');
+        trxEl.innerHTML = trxList.map((t) => {
+          const isSetor = String(t.jenis || '').toUpperCase() === 'SETOR';
+          const prefix = isSetor ? '+' : '-';
+          const color = isSetor ? 'var(--green-dark)' : 'var(--ink)';
           return `
-            <div class="trx-item">
+            <div class="list-item">
               <div>
-                <div class="trx-title">${t.metode || 'Top-Up'} • <span class="${stClass}">${st}</span></div>
-                <div class="trx-sub">${t.waktu}${t.catatan ? ' • ' + t.catatan : ''}</div>
+                <div class="item-title">${t.jenis || 'TRANSAKSI'} • ${t.petugas || 'Sistem'}</div>
+                <div class="item-sub">${t.waktu || ''} • ${t.id_trx || ''}</div>
               </div>
-              <div class="trx-amount">${rupiah(t.nominal)}</div>
+              <div class="item-right" style="color:${color};">
+                ${prefix}${formatRp(t.nominal)}
+                <div class="item-sub">Saldo: ${formatRp(t.saldo_akhir)}</div>
+              </div>
             </div>
           `;
         }).join('');
       }
 
-      const listEl = document.getElementById('trxList');
-      if (!riwayat.length) {
-        listEl.innerHTML = '<p class="muted">Belum ada riwayat transaksi.</p>';
-        return;
-      }
+      // Render TopUp
+      const topupList = Array.isArray(data.topup) ? data.topup : [];
+      const topupEl = document.getElementById('listTopup');
+      if (!topupList.length) {
+        topupEl.innerHTML = '<p class="item-sub">Belum ada pengajuan top-up.</p>';
+      } else {
+        topupEl.innerHTML = topupList.map((item) => {
+          const stUp = String(item.status || 'MENUNGGU').toUpperCase();
+          let badgeClass = 'badge-soft pending';
+          if (stUp === 'DISETUJUI') badgeClass = 'badge-soft';
+          if (stUp === 'DITOLAK') badgeClass = 'badge-soft rejected';
 
-      listEl.innerHTML = riwayat.map(item => {
-        const isSetor = item.jenis === 'SETOR';
-        const sign = isSetor ? '+' : '-';
-        const cls = isSetor ? 'in' : 'out';
-        return `
-          <div class="trx-item">
-            <div>
-              <div class="trx-title">${item.jenis} • ${item.petugas || 'Petugas'}</div>
-              <div class="trx-sub">${item.waktu} • Saldo akhir: ${rupiah(item.saldo_akhir)}</div>
+          return `
+            <div class="list-item">
+              <div>
+                <div class="item-title">${item.metode || 'Top-Up'} • <span class="${badgeClass}">${stUp}</span></div>
+                <div class="item-sub">${item.waktu || ''}${item.catatan ? ' • ' + item.catatan : ''}</div>
+                ${item.catatan_admin ? `<div class="item-sub" style="color:var(--ink);">Admin: ${item.catatan_admin}</div>` : ''}
+              </div>
+              <div class="item-right">${formatRp(item.nominal)}</div>
             </div>
-            <div class="trx-amount ${cls}">${sign}${rupiah(item.nominal)}</div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
     }
 
-    async function submitTopup() {
-      if (!sessionAuth) return;
-      const nominal = Number(document.getElementById('topupNominal').value || 0);
-      const metode = document.getElementById('topupMetode').value;
-      const catatan = document.getElementById('topupCatatan').value.trim();
+    async function loadWaliData(nis, pin) {
+      const url = `${SCRIPT_URL}?action=waliLogin&nis=${encodeURIComponent(nis)}&pin=${encodeURIComponent(pin)}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || 'Gagal memuat data.');
+      return json;
+    }
 
-      if (!nominal || nominal <= 0) {
-        return showTopupMsg('Masukkan nominal top-up yang valid.', false);
-      }
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nis = document.getElementById('inputNis').value.trim();
+      const pin = document.getElementById('inputPin').value.trim();
+      const alertEl = document.getElementById('loginAlert');
 
       try {
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'ajukanTopup',
-            nis: sessionAuth.nis,
-            pin: sessionAuth.pin,
-            nominal: nominal,
-            metode: metode,
-            catatan: catatan
-          })
-        });
-        const data = await res.json();
-        if (!data.ok) {
-          return showTopupMsg(data.message || 'Gagal mengajukan top-up.', false);
-        }
-
-        document.getElementById('topupNominal').value = '';
-        document.getElementById('topupCatatan').value = '';
-        showTopupMsg(`${data.message} (ID: ${data.id_topup})`, true);
-        refreshData();
+        const data = await loadWaliData(nis, pin);
+        session = { nis, pin };
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        document.getElementById('btnLogout').classList.remove('hidden');
+        alertEl.classList.remove('show');
+        renderDashboard(data);
       } catch (err) {
-        showTopupMsg('Error mengirim pengajuan: ' + err.message, false);
+        showAlert(alertEl, err.message, false);
       }
-    }
+    });
 
-    function kirimWaTopup() {
+    document.getElementById('topupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('topupAlert');
       const nominal = Number(document.getElementById('topupNominal').value || 0);
       const metode = document.getElementById('topupMetode').value;
       const catatan = document.getElementById('topupCatatan').value.trim();
-      const nama = currentSantri ? currentSantri.nama : '-';
-      const nis = sessionAuth ? sessionAuth.nis : '-';
 
-      const teks = [
-        'Assalamu\'alaikum, konfirmasi *Top-Up Saldo ATM Santri*:',
-        `• Nama: ${nama} (NIS: ${nis})`,
-        `• Nominal: ${nominal ? rupiah(nominal) : '-'}`,
-        `• Metode: ${metode}`,
-        catatan ? `• Catatan: ${catatan}` : ''
-      ].filter(Boolean).join('\n');
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'ajukanTopup',
+            nis: session.nis,
+            pin: session.pin,
+            nominal,
+            metode,
+            catatan
+          })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'Gagal mengajukan top-up.');
 
-      const waUrl = WA_BENDAHARA
-        ? `https://wa.me/${WA_BENDAHARA}?text=${encodeURIComponent(teks)}`
-        : `https://wa.me/?text=${encodeURIComponent(teks)}`;
-      window.open(waUrl, '_blank');
-    }
-
-    function refreshData() {
-      if (sessionAuth) loginWali(sessionAuth.nis, sessionAuth.pin);
-    }
-
-    function logoutWali() {
-      sessionAuth = null;
-      currentSantri = null;
-      sessionStorage.removeItem('wali_auth');
-      document.getElementById('loginPin').value = '';
-      document.getElementById('dashBox').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'block';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = sessionStorage.getItem('wali_auth');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.nis && parsed.pin) loginWali(parsed.nis, parsed.pin);
-        } catch (_) {}
+        showAlert(alertEl, json.message + ' (' + (json.id_topup || '') + ')', true);
+        document.getElementById('topupForm').reset();
+        const refreshed = await loadWaliData(session.nis, session.pin);
+        renderDashboard(refreshed);
+      } catch (err) {
+        showAlert(alertEl, err.message, false);
       }
+    });
+
+    document.getElementById('btnRefresh').addEventListener('click', async () => {
+      if (!session.nis) return;
+      const data = await loadWaliData(session.nis, session.pin);
+      renderDashboard(data);
+    });
+
+    document.getElementById('btnGoTopup').addEventListener('click', () => switchTab('topup'));
+
+    document.getElementById('btnWaPengasuh').addEventListener('click', () => {
+      const namaSantri = document.getElementById('santriNama').textContent;
+      const teks = encodeURIComponent(
+        `Assalamualaikum, saya wali dari ${namaSantri} (NIS: ${session.nis}) — PPS. NU Raden Keunyeup.`
+      );
+      window.open(`https://wa.me/${WA_BENDAHARA}?text=${teks}`, '_blank');
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      session = { nis: '', pin: '' };
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('btnLogout').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('greetingTitle').textContent = 'Wali Santri';
+      document.getElementById('loginForm').reset();
+    });
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.querySelectorAll('.nav-item').forEach((nav) => {
+      nav.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
+        nav.classList.add('active');
+        const target = nav.dataset.nav;
+        if (target === 'tagihan') switchTab('tagihan');
+        else if (target === 'topup') switchTab('topup');
+        else switchTab('transaksi');
+      });
     });
   </script>
 </body>
