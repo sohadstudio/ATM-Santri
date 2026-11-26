@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Santri - Generator QR & Link NFC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f3f4f6; color: #111827; padding: 16px; }
+    .container { max-width: 820px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 0 0 8px; }
+    .muted { color: #6b7280; font-size: 13px; margin: 0; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+    input, textarea, button {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid #d1d5db; font-size: 14px;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 10px; }
+    button:hover { opacity: 0.92; }
+    button.secondary { background: #e5e7eb; color: #111827; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .row > * { flex: 1 1 180px; }
+    .nfc-box {
+      background: #f9fafb; border: 1px dashed #9ca3af; border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; word-break: break-all; margin-top: 8px;
+    }
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px; margin-top: 14px;
+    }
+    .id-card {
+      width: 100%; aspect-ratio: 85.6 / 54; background: #141414; color: #fff;
+      border-radius: 12px; padding: 14px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; border: 1px solid #27272a;
+    }
+    .id-meta { flex: 1; min-width: 0; }
+    .id-badge { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #a1a1aa; }
+    .id-name { font-size: 16px; font-weight: 700; margin: 4px 0 2px; word-wrap: break-word; }
+    .id-sub { font-size: 12px; color: #d4d4d8; }
+    .qr-wrap {
+      background: #fff; padding: 6px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .card-actions { margin-top: 8px; display: flex; gap: 6px; }
+    .card-actions button { margin-top: 0; padding: 8px 10px; font-size: 12px; }
+    .toast {
+      margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+      background: #dcfce7; color: #166534; font-size: 13px; font-weight: 500; display: none;
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .no-print { display: none !important; }
+      .cards-grid { grid-template-columns: repeat(2, 85.6mm); gap: 6mm; margin-top: 0; }
+      .id-card { width: 85.6mm; height: 54mm; break-inside: avoid; }
+      .card-actions { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card no-print">
+      <h1>ATM Santri — Generator QR & Link NFC</h1>
+      <p class="muted">Buat QR Code dan link NFC per NIS santri untuk dicetak dan di-write ke kartu</p>
+
+      <label for="baseKasirUrl">URL Halaman Kasir</label>
+      <input type="text" id="baseKasirUrl" value="https://sohadstudio.github.io/ATM-Santri/" />
+
+      <div class="row">
+        <div>
+          <label for="nisSingle">NIS Santri</label>
+          <input type="text" id="nisSingle" placeholder="Contoh: 2026001" value="2026001" />
+        </div>
+        <div>
+          <label for="namaSingle">Nama Santri</label>
+          <input type="text" id="namaSingle" placeholder="Contoh: Ahmad Fauzi" value="Ahmad Fauzi" />
+        </div>
+        <div>
+          <label for="kamarSingle">Kamar / Kelas</label>
+          <input type="text" id="kamarSingle" placeholder="Contoh: Al-Hikmah 01" value="Al-Hikmah 01" />
+        </div>
+      </div>
+
+      <button type="button" onclick="generateSingle()">Generate Kartu Satuan</button>
+
+      <label for="bulkInput">Atau Generate Massal (1 baris = <code>NIS,Nama,Kamar</code>)</label>
+      <textarea id="bulkInput" placeholder="2026001,Ahmad Fauzi,Al-Hikmah 01&#10;2026002,Siti Aisyah,Khadijah 03&#10;2026003,Muhammad Rizky,Al-Farabi 02"></textarea>
+
+      <div class="row">
+        <button type="button" class="secondary" onclick="generateBulk()">Generate Daftar Massal</button>
+        <button type="button" class="secondary" onclick="window.print()">Cetak / Simpan PDF</button>
+      </div>
+
+      <div id="toast" class="toast"></div>
+    </div>
+
+    <div id="outputArea"></div>
+  </div>
+
+  <script>
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 2600);
+    }
+
+    function buildNfcUrl(nis) {
+      const base = document.getElementById('baseKasirUrl').value.trim().replace(/\/+$/, '');
+      return `${base}/?nis=${encodeURIComponent(nis.trim())}`;
+    }
+
+    function copyText(text, label = 'Link NFC') {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`${label} berhasil disalin: ${text}`);
+      }).catch(() => {
+        prompt(`Salin ${label} secara manual:`, text);
+      });
+    }
+
+    function downloadQr(containerId, filename) {
+      const canvas = document.querySelector(`#${containerId} canvas`);
+      const img = document.querySelector(`#${containerId} img`);
+      let dataUrl = '';
+      if (canvas) {
+        dataUrl = canvas.toDataURL('image/png');
+      } else if (img && img.src) {
+        dataUrl = img.src;
+      }
+      if (!dataUrl) return showToast('QR belum siap diunduh.');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${filename}-qr.png`;
+      a.click();
+    }
+
+    function renderCards(items) {
+      const area = document.getElementById('outputArea');
+      area.innerHTML = '';
+
+      items.forEach((item, idx) => {
+        const nis = (item.nis || '').trim();
+        if (!nis) return;
+        const nama = (item.nama || 'Santri').trim();
+        const kamar = (item.kamar || '-').trim();
+        const url = buildNfcUrl(nis);
+        const qrId = `qr-${idx}-${Date.now()}`;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'card';
+        wrap.innerHTML = `
+          <div class="id-card">
+            <div class="id-meta">
+              <div class="id-badge">ATM SANTRI • NFC & QR</div>
+              <div class="id-name">${escapeHtml(nama)}</div>
+              <div class="id-sub">NIS: ${escapeHtml(nis)}</div>
+              <div class="id-sub">Kamar: ${escapeHtml(kamar)}</div>
+            </div>
+            <div class="qr-wrap" id="${qrId}"></div>
+          </div>
+          <div class="nfc-box"><strong>Payload / Link NFC:</strong> ${escapeHtml(url)}</div>
+          <div class="card-actions no-print">
+            <button type="button" onclick="copyText('${escapeJs(url)}', 'Link NFC')">Salin Link NFC</button>
+            <button type="button" class="secondary" onclick="downloadQr('${qrId}', '${escapeJs(nis)}')">Unduh QR PNG</button>
+          </div>
+        `;
+        area.appendChild(wrap);
+
+        new QRCode(document.getElementById(qrId), {
+          text: url,
+          width: 84,
+          height: 84,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeJs(str) {
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function generateSingle() {
+      const nis = document.getElementById('nisSingle').value.trim();
+      const nama = document.getElementById('namaSingle').value.trim();
+      const kamar = document.getElementById('kamarSingle').value.trim();
+      if (!nis) return showToast('Masukkan NIS santri terlebih dahulu.');
+      renderCards([{ nis, nama, kamar }]);
+      showToast(`Kartu & link NFC untuk NIS ${nis} dibuat.`);
+    }
+
+    function generateBulk() {
+      const raw = document.getElementById('bulkInput').value.trim();
+      if (!raw) return showToast('Masukkan minimal 1 baris data santri.');
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const list = lines.map(line => {
+        const parts = line.split(/[,;\t]/);
+        return {
+          nis: (parts[0] || '').trim(),
+          nama: (parts[1] || 'Santri').trim(),
+          kamar: (parts[2] || '-').trim()
+        };
+      }).filter(x => x.nis);
+      if (!list.length) return showToast('Format baris tidak valid.');
+      renderCards(list);
+      showToast(`${list.length} kartu & link NFC berhasil dibuat.`);
+    }
+
+    window.addEventListener('DOMContentLoaded', generateSingle);
+  </script>
+</body>
+</html>
