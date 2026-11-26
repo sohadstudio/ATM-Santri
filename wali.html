@@ -205,8 +205,8 @@
     }
 
     .avatar {
-      width: 56px;
-      height: 56px;
+      width: 58px;
+      height: 58px;
       border-radius: 999px;
       background: var(--green-light);
       border: 2.5px solid var(--green-main);
@@ -582,7 +582,7 @@
 
           <div class="action-row-2">
             <button id="btnGoTopup" class="btn-outline-green" type="button">Isi Saldo</button>
-            <button id="btnWaPengasuh" class="btn-outline-slate" type="button">Pengasuh / Bendahara</button>
+            <button id="btnWaPengasuh" class="btn-outline-slate" type="button">Pengurus / Bendahara</button>
           </div>
         </div>
 
@@ -637,7 +637,7 @@
           <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 6px;">Informasi Tagihan</h3>
           <p style="font-size: 12.5px; color: var(--muted); line-height: 1.55;">
             Total tunggakan tercatat saat ini: <strong id="tagihanInfoNominal" style="color:var(--ink);">Rp 0</strong>.
-            Untuk konfirmasi administrasi pondok, silakan hubungi bendahara atau pengasuh.
+            Untuk konfirmasi administrasi pondok, silakan hubungi pengurus atau bendahara.
           </p>
         </div>
 
@@ -686,15 +686,8 @@
   </div>
 
   <script>
-    // 1. Ganti dengan URL Web App Google Apps Script kamu
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
-
-    // 2. Ganti dengan nomor WhatsApp Bendahara/Pengasuh (format 62...)
-    const WA_BENDAHARA = '6285111311421';
-
-    // 3. Folder foto santri di GitHub (contoh: foto/2026001.jpg).
-    // Jika di tab Santri ada kolom foto_url dari backend, otomatis memakai foto_url tersebut dulu.
-    const FOTO_FOLDER = 'foto';
+    const WA_PENGURUS = '6285111311421';
 
     let session = { nis: '', pin: '' };
 
@@ -715,15 +708,27 @@
       document.getElementById('panelProfil').classList.toggle('hidden', tabName !== 'profil');
     }
 
+    function normalizePhotoUrl(rawUrl) {
+      const url = String(rawUrl || '').trim();
+      if (!url) return '';
+      // Otomatis ubah link share Google Drive (/file/d/ID/view atau ?id=ID) menjadi direct image URL
+      const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+      if (driveFileMatch && driveFileMatch[1]) {
+        return `https://drive.google.com/thumbnail?id=${driveFileMatch[1]}&sz=w400`;
+      }
+      const driveIdMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      if (driveIdMatch && driveIdMatch[1]) {
+        return `https://drive.google.com/thumbnail?id=${driveIdMatch[1]}&sz=w400`;
+      }
+      return url;
+    }
+
     function renderSantriPhoto(santri, initials) {
       const imgEl = document.getElementById('santriFoto');
       const initEl = document.getElementById('santriInisial');
       initEl.textContent = initials || 'S';
 
-      const customUrl = String(santri.foto_url || '').trim();
-      const fallbackFileUrl = santri.nis ? `${FOTO_FOLDER}/${encodeURIComponent(santri.nis)}.jpg` : '';
-      const targetSrc = customUrl || fallbackFileUrl;
-
+      const targetSrc = normalizePhotoUrl(santri.foto_url);
       if (!targetSrc) {
         imgEl.classList.add('hidden');
         initEl.classList.remove('hidden');
@@ -761,7 +766,6 @@
       statusBadge.textContent = st;
       statusBadge.classList.toggle('blokir', st !== 'AKTIF');
 
-      // Total Saldo, Sisa Jajan Hari Ini, dan Tunggakan
       const totalSaldo = Number(s.saldo || 0);
       const sisaJajan = typeof s.sisa_limit === 'number' ? s.sisa_limit : totalSaldo;
       const tunggakan = Number(s.tunggakan || 0);
@@ -920,7 +924,7 @@
       const teks = encodeURIComponent(
         `Assalamualaikum, saya wali dari ${namaSantri} (NIS: ${session.nis}) — PPS. NU Raden Keunyeup.`
       );
-      window.open(`https://wa.me/${WA_BENDAHARA}?text=${teks}`, '_blank');
+      window.open(`https://wa.me/${WA_PENGURUS}?text=${teks}`, '_blank');
     });
 
     document.getElementById('btnLogout').addEventListener('click', () => {
