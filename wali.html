@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Santri - Portal Wali Santri</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f3f4f6; color: #111827; padding: 16px; }
+    .container { max-width: 480px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 0 0 10px; }
+    .muted { color: #6b7280; font-size: 13px; margin: 0; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+    input, button {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1px solid #d1d5db; font-size: 15px;
+    }
+    button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 14px; }
+    button:hover { opacity: 0.92; }
+    button.secondary { background: #e5e7eb; color: #111827; margin-top: 8px; }
+    .saldo-banner {
+      background: #141414; color: #fff; border-radius: 14px; padding: 18px; margin-top: 12px;
+    }
+    .saldo-label { font-size: 12px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.05em; }
+    .saldo-val { font-size: 28px; font-weight: 700; margin: 4px 0 10px; }
+    .meta-row { display: flex; justify-content: space-between; font-size: 13px; color: #d4d4d8; border-top: 1px solid #27272a; padding-top: 10px; }
+    .trx-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 10px;
+    }
+    .trx-item:last-child { border-bottom: none; }
+    .trx-title { font-weight: 600; font-size: 14px; }
+    .trx-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .trx-amount { font-weight: 700; font-size: 14px; text-align: right; white-space: nowrap; }
+    .in { color: #15803d; }
+    .out { color: #b91c1c; }
+    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; background: #fee2e2; color: #991b1b; display: none; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #dcfce7; color: #166534; }
+    .badge.blocked { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- FORM LOGIN -->
+    <div id="loginBox" class="card">
+      <h1>Portal Wali Santri</h1>
+      <p class="muted">Pantau saldo tabungan dan riwayat transaksi anak secara real-time</p>
+
+      <label for="loginNis">NIS Santri</label>
+      <input type="text" id="loginNis" placeholder="Contoh: 2026001" />
+
+      <label for="loginPin">PIN Santri / Wali</label>
+      <input type="password" id="loginPin" inputmode="numeric" maxlength="8" placeholder="Masukkan PIN" />
+
+      <button type="button" onclick="loginWali()">Masuk & Cek Saldo</button>
+      <div id="loginErr" class="alert"></div>
+    </div>
+
+    <!-- DASHBOARD SANTRI -->
+    <div id="dashBox" style="display: none;">
+      <div class="card">
+        <div class="topbar">
+          <div>
+            <h1 id="dNama">-</h1>
+            <p class="muted"><span id="dKamar">-</span> • NIS <span id="dNis">-</span></p>
+          </div>
+          <span id="dStatus" class="badge">AKTIF</span>
+        </div>
+
+        <div class="saldo-banner">
+          <div class="saldo-label">Saldo Tabungan Aktif</div>
+          <div class="saldo-val" id="dSaldo">Rp0</div>
+          <div class="meta-row">
+            <span>Limit Harian: <strong id="dLimitHarian">Rp0</strong></span>
+            <span>Sisa Hari Ini: <strong id="dSisaLimit">Rp0</strong></span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button type="button" class="secondary" onclick="refreshData()">Muat Ulang</button>
+          <button type="button" class="secondary" onclick="logoutWali()">Keluar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Riwayat Transaksi Terakhir</h2>
+        <div id="trxList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
+    let sessionAuth = null;
+
+    function rupiah(n) {
+      return 'Rp' + Number(n || 0).toLocaleString('id-ID');
+    }
+
+    function showErr(msg) {
+      const el = document.getElementById('loginErr');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    async function loginWali(savedNis = null, savedPin = null) {
+      const nis = (savedNis || document.getElementById('loginNis').value).trim();
+      const pin = (savedPin || document.getElementById('loginPin').value).trim();
+      document.getElementById('loginErr').style.display = 'none';
+
+      if (!nis || !pin) {
+        return showErr('Masukkan NIS dan PIN terlebih dahulu.');
+      }
+
+      try {
+        const url = `${GAS_URL}?action=waliLogin&nis=${encodeURIComponent(nis)}&pin=${encodeURIComponent(pin)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.ok) {
+          sessionStorage.removeItem('wali_auth');
+          return showErr(data.message || 'Gagal masuk.');
+        }
+
+        sessionAuth = { nis, pin };
+        sessionStorage.setItem('wali_auth', JSON.stringify(sessionAuth));
+        renderDashboard(data.santri, data.riwayat || []);
+      } catch (err) {
+        showErr('Gagal menghubungi server: ' + err.message);
+      }
+    }
+
+    function renderDashboard(s, riwayat) {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('dashBox').style.display = 'block';
+
+      document.getElementById('dNama').textContent = s.nama;
+      document.getElementById('dKamar').textContent = s.kamar;
+      document.getElementById('dNis').textContent = s.nis;
+      document.getElementById('dSaldo').textContent = rupiah(s.saldo);
+      document.getElementById('dLimitHarian').textContent = rupiah(s.limit_harian);
+      document.getElementById('dSisaLimit').textContent = rupiah(s.sisa_limit);
+
+      const badge = document.getElementById('dStatus');
+      badge.textContent = s.status;
+      badge.className = 'badge' + (s.status !== 'AKTIF' ? ' blocked' : '');
+
+      const listEl = document.getElementById('trxList');
+      if (!riwayat.length) {
+        listEl.innerHTML = '<p class="muted">Belum ada riwayat transaksi.</p>';
+        return;
+      }
+
+      listEl.innerHTML = riwayat.map(item => {
+        const isSetor = item.jenis === 'SETOR';
+        const sign = isSetor ? '+' : '-';
+        const cls = isSetor ? 'in' : 'out';
+        return `
+          <div class="trx-item">
+            <div>
+              <div class="trx-title">${item.jenis} • ${item.petugas || 'Petugas'}</div>
+              <div class="trx-sub">${item.waktu} • Saldo akhir: ${rupiah(item.saldo_akhir)}</div>
+            </div>
+            <div class="trx-amount ${cls}">${sign}${rupiah(item.nominal)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function refreshData() {
+      if (sessionAuth) loginWali(sessionAuth.nis, sessionAuth.pin);
+    }
+
+    function logoutWali() {
+      sessionAuth = null;
+      sessionStorage.removeItem('wali_auth');
+      document.getElementById('loginPin').value = '';
+      document.getElementById('dashBox').style.display = 'none';
+      document.getElementById('loginBox').style.display = 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = sessionStorage.getItem('wali_auth');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.nis && parsed.pin) loginWali(parsed.nis, parsed.pin);
+        } catch (_) {}
+      }
+    });
+  </script>
+</body>
+</html>
