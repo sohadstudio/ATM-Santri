@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --green-dark: #065f46;
+      --green-dark: #064e3b;
+      --green-mid: #065f46;
       --green-main: #059669;
       --green-light: #ecfdf5;
       --green-border: #a7f3d0;
@@ -33,7 +34,7 @@
       background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
-      padding-bottom: 84px;
+      padding-bottom: 86px;
     }
 
     .app-shell {
@@ -46,7 +47,7 @@
 
     /* Top Header */
     .top-header {
-      background: linear-gradient(145deg, #064e3b 0%, #059669 100%);
+      background: linear-gradient(145deg, var(--green-dark) 0%, var(--green-main) 100%);
       color: #ffffff;
       padding: 20px 18px 68px;
       border-bottom-left-radius: 26px;
@@ -88,7 +89,7 @@
 
     .brand-sub {
       font-size: 11.5px;
-      color: rgba(255, 255, 255, 0.82);
+      color: rgba(255, 255, 255, 0.84);
       margin-top: 2px;
     }
 
@@ -98,6 +99,7 @@
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 999px;
       padding: 6px 12px;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -179,10 +181,15 @@
     }
 
     .btn-primary:hover {
-      background: var(--green-dark);
+      background: var(--green-mid);
     }
 
-    /* Santri Profile Card */
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Santri Profile Card & Foto */
     .profile-top {
       display: flex;
       align-items: center;
@@ -194,25 +201,37 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      min-width: 0;
     }
 
     .avatar {
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       border-radius: 999px;
       background: var(--green-light);
-      border: 2px solid var(--green-border);
+      border: 2.5px solid var(--green-main);
       color: var(--green-dark);
       font-weight: 800;
       font-size: 18px;
       display: grid;
       place-items: center;
+      overflow: hidden;
       flex-shrink: 0;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .santri-name {
       font-size: 16px;
       font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .santri-meta {
@@ -230,6 +249,7 @@
       color: var(--green-dark);
       border: 1px solid var(--green-border);
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .pill-status.blokir {
@@ -238,24 +258,57 @@
       border-color: #fecaca;
     }
 
-    /* 2 Summary Cards (Poin Adab Dihapus) */
+    /* Banner Total Saldo Aktif */
+    .total-saldo-banner {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .total-saldo-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .total-saldo-sub {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.78);
+      margin-top: 2px;
+    }
+
+    .total-saldo-amount {
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    /* 2 Summary Cards (Sisa Jajan & Tunggakan - Poin Adab Dihapus) */
     .summary-grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 14px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
     .summary-box {
       background: #f8fafc;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 13px 12px;
+      border-radius: 15px;
+      padding: 12px;
       text-align: center;
     }
 
     .summary-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       letter-spacing: 0.4px;
       color: var(--muted);
@@ -263,10 +316,10 @@
     }
 
     .summary-value {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
-      margin-top: 5px;
-      color: var(--green-dark);
+      margin-top: 4px;
+      color: var(--green-mid);
     }
 
     .summary-value.tunggakan {
@@ -278,7 +331,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
     .btn-outline-green {
@@ -336,7 +389,7 @@
     /* List Items */
     .list-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
       padding: 12px 0;
@@ -363,13 +416,14 @@
       text-align: right;
       font-size: 13px;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .badge-soft {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       background: var(--green-light);
       color: var(--green-dark);
@@ -430,7 +484,7 @@
       background: transparent;
       color: var(--muted);
       font-family: inherit;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 700;
       display: flex;
       flex-direction: column;
@@ -482,19 +536,22 @@
             <label class="field-label" for="inputPin">PIN Santri</label>
             <input id="inputPin" class="input-control" type="password" placeholder="Masukkan PIN" required />
           </div>
-          <button class="btn-primary" type="submit">Lihat Data Santri</button>
+          <button id="btnLoginSubmit" class="btn-primary" type="submit">Lihat Data Santri</button>
         </form>
         <div id="loginAlert" class="alert-box"></div>
       </section>
 
       <!-- Dashboard Section -->
       <section id="dashboardSection" class="hidden">
-        <!-- Profil & 2 Kartu Ringkasan (Sisa Jajan & Tunggakan) -->
+        <!-- Profil Santri + Total Saldo + Sisa Jajan & Tunggakan -->
         <div class="card">
           <div class="profile-top">
             <div class="profile-info-wrap">
-              <div id="santriAvatar" class="avatar">MS</div>
-              <div>
+              <div id="santriAvatar" class="avatar">
+                <img id="santriFoto" src="" alt="Foto Santri" class="hidden" />
+                <span id="santriInisial">MS</span>
+              </div>
+              <div style="min-width:0;">
                 <div id="santriNama" class="santri-name">-</div>
                 <div id="santriMeta" class="santri-meta">NIS: - • Kamar: -</div>
               </div>
@@ -502,9 +559,19 @@
             <span id="santriStatusBadge" class="pill-status">AKTIF</span>
           </div>
 
+          <!-- Total Saldo Aktif -->
+          <div class="total-saldo-banner">
+            <div>
+              <div class="total-saldo-label">Total Saldo Tabungan</div>
+              <div id="limitHarianInfo" class="total-saldo-sub">Limit harian: Rp 0</div>
+            </div>
+            <div id="valTotalSaldo" class="total-saldo-amount">Rp 0</div>
+          </div>
+
+          <!-- 2 Kartu Ringkasan (Sisa Jajan & Tunggakan) -->
           <div class="summary-grid-2">
             <div class="summary-box">
-              <div class="summary-label">SISA JAJAN</div>
+              <div class="summary-label">SISA JAJAN HARI INI</div>
               <div id="valSisaJajan" class="summary-value">Rp 0</div>
             </div>
             <div class="summary-box">
@@ -519,11 +586,12 @@
           </div>
         </div>
 
-        <!-- Tabs: Transaksi & Top-Up -->
+        <!-- Tabs -->
         <div class="tab-bar">
           <button class="tab-btn active" data-tab="transaksi" type="button">Transaksi</button>
           <button class="tab-btn" data-tab="topup" type="button">Isi Saldo & Status</button>
           <button class="tab-btn" data-tab="tagihan" type="button">Tagihan</button>
+          <button class="tab-btn" data-tab="profil" type="button">Profil</button>
         </div>
 
         <!-- Tab: Riwayat Transaksi -->
@@ -555,7 +623,7 @@
               <label class="field-label" for="topupCatatan">Catatan / Nama Pengirim</label>
               <input id="topupCatatan" class="input-control" type="text" placeholder="Contoh: a.n. Wali Santri" />
             </div>
-            <button class="btn-primary" type="submit">Ajukan Top-Up</button>
+            <button id="btnTopupSubmit" class="btn-primary" type="submit">Ajukan Top-Up</button>
           </form>
           <div id="topupAlert" class="alert-box"></div>
 
@@ -567,10 +635,35 @@
         <!-- Tab: Tagihan -->
         <div id="panelTagihan" class="card hidden">
           <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 6px;">Informasi Tagihan</h3>
-          <p style="font-size: 12.5px; color: var(--muted);">
+          <p style="font-size: 12.5px; color: var(--muted); line-height: 1.55;">
             Total tunggakan tercatat saat ini: <strong id="tagihanInfoNominal" style="color:var(--ink);">Rp 0</strong>.
             Untuk konfirmasi administrasi pondok, silakan hubungi bendahara atau pengasuh.
           </p>
+        </div>
+
+        <!-- Tab: Profil Santri -->
+        <div id="panelProfil" class="card hidden">
+          <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">Detail Profil Santri</h3>
+          <div class="list-item">
+            <span class="item-sub">Nama Lengkap</span>
+            <span id="detailNama" class="item-title">-</span>
+          </div>
+          <div class="list-item">
+            <span class="item-sub">NIS</span>
+            <span id="detailNis" class="item-title">-</span>
+          </div>
+          <div class="list-item">
+            <span class="item-sub">Kamar / Asrama</span>
+            <span id="detailKamar" class="item-title">-</span>
+          </div>
+          <div class="list-item">
+            <span class="item-sub">Limit Jajan Harian</span>
+            <span id="detailLimit" class="item-title">Rp 0</span>
+          </div>
+          <div class="list-item">
+            <span class="item-sub">Status Kartu</span>
+            <span id="detailStatus" class="item-title">AKTIF</span>
+          </div>
         </div>
       </section>
     </main>
@@ -593,9 +686,15 @@
   </div>
 
   <script>
-    // Ganti dengan URL Web App Google Apps Script milikmu
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
-    const WA_BENDAHARA = '6285111311421'; // Ganti nomor WA bendahara/pengasuh (format 62...)
+    // 1. Ganti dengan URL Web App Google Apps Script kamu
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_GANTI_DENGAN_DEPLOYMENT_ID_KAMU/exec';
+
+    // 2. Ganti dengan nomor WhatsApp Bendahara/Pengasuh (format 62...)
+    const WA_BENDAHARA = '6281234567890';
+
+    // 3. Folder foto santri di GitHub (contoh: foto/2026001.jpg).
+    // Jika di tab Santri ada kolom foto_url dari backend, otomatis memakai foto_url tersebut dulu.
+    const FOTO_FOLDER = 'foto';
 
     let session = { nis: '', pin: '' };
 
@@ -613,6 +712,33 @@
       document.getElementById('panelTransaksi').classList.toggle('hidden', tabName !== 'transaksi');
       document.getElementById('panelTopup').classList.toggle('hidden', tabName !== 'topup');
       document.getElementById('panelTagihan').classList.toggle('hidden', tabName !== 'tagihan');
+      document.getElementById('panelProfil').classList.toggle('hidden', tabName !== 'profil');
+    }
+
+    function renderSantriPhoto(santri, initials) {
+      const imgEl = document.getElementById('santriFoto');
+      const initEl = document.getElementById('santriInisial');
+      initEl.textContent = initials || 'S';
+
+      const customUrl = String(santri.foto_url || '').trim();
+      const fallbackFileUrl = santri.nis ? `${FOTO_FOLDER}/${encodeURIComponent(santri.nis)}.jpg` : '';
+      const targetSrc = customUrl || fallbackFileUrl;
+
+      if (!targetSrc) {
+        imgEl.classList.add('hidden');
+        initEl.classList.remove('hidden');
+        return;
+      }
+
+      imgEl.onload = () => {
+        imgEl.classList.remove('hidden');
+        initEl.classList.add('hidden');
+      };
+      imgEl.onerror = () => {
+        imgEl.classList.add('hidden');
+        initEl.classList.remove('hidden');
+      };
+      imgEl.src = targetSrc;
     }
 
     function renderDashboard(data) {
@@ -627,20 +753,31 @@
         .map((w) => w[0] || '')
         .join('')
         .toUpperCase();
-      document.getElementById('santriAvatar').textContent = initials || 'S';
+
+      renderSantriPhoto(s, initials);
 
       const statusBadge = document.getElementById('santriStatusBadge');
       const st = String(s.status || 'AKTIF').toUpperCase();
       statusBadge.textContent = st;
       statusBadge.classList.toggle('blokir', st !== 'AKTIF');
 
-      // Sisa Jajan: utamakan sisa_limit bila ada, atau tampilkan saldo
-      const sisaJajan = typeof s.sisa_limit === 'number' ? s.sisa_limit : (s.saldo || 0);
+      // Total Saldo, Sisa Jajan Hari Ini, dan Tunggakan
+      const totalSaldo = Number(s.saldo || 0);
+      const sisaJajan = typeof s.sisa_limit === 'number' ? s.sisa_limit : totalSaldo;
       const tunggakan = Number(s.tunggakan || 0);
 
+      document.getElementById('valTotalSaldo').textContent = formatRp(totalSaldo);
+      document.getElementById('limitHarianInfo').textContent = 'Limit harian: ' + formatRp(s.limit_harian || 0);
       document.getElementById('valSisaJajan').textContent = formatRp(sisaJajan);
       document.getElementById('valTunggakan').textContent = formatRp(tunggakan);
       document.getElementById('tagihanInfoNominal').textContent = formatRp(tunggakan);
+
+      // Detail Profil
+      document.getElementById('detailNama').textContent = s.nama || '-';
+      document.getElementById('detailNis').textContent = s.nis || '-';
+      document.getElementById('detailKamar').textContent = s.kamar || '-';
+      document.getElementById('detailLimit').textContent = formatRp(s.limit_harian || 0);
+      document.getElementById('detailStatus').textContent = st;
 
       // Render Transaksi
       const trxList = Array.isArray(data.riwayat) ? data.riwayat : [];
@@ -651,7 +788,7 @@
         trxEl.innerHTML = trxList.map((t) => {
           const isSetor = String(t.jenis || '').toUpperCase() === 'SETOR';
           const prefix = isSetor ? '+' : '-';
-          const color = isSetor ? 'var(--green-dark)' : 'var(--ink)';
+          const color = isSetor ? 'var(--green-mid)' : 'var(--ink)';
           return `
             <div class="list-item">
               <div>
@@ -682,7 +819,7 @@
           return `
             <div class="list-item">
               <div>
-                <div class="item-title">${item.metode || 'Top-Up'} • <span class="${badgeClass}">${stUp}</span></div>
+                <div class="item-title">${item.metode || 'Top-Up'} <span class="${badgeClass}">${stUp}</span></div>
                 <div class="item-sub">${item.waktu || ''}${item.catatan ? ' • ' + item.catatan : ''}</div>
                 ${item.catatan_admin ? `<div class="item-sub" style="color:var(--ink);">Admin: ${item.catatan_admin}</div>` : ''}
               </div>
@@ -706,7 +843,10 @@
       const nis = document.getElementById('inputNis').value.trim();
       const pin = document.getElementById('inputPin').value.trim();
       const alertEl = document.getElementById('loginAlert');
+      const btn = document.getElementById('btnLoginSubmit');
 
+      btn.disabled = true;
+      btn.textContent = 'Memuat...';
       try {
         const data = await loadWaliData(nis, pin);
         session = { nis, pin };
@@ -717,16 +857,22 @@
         renderDashboard(data);
       } catch (err) {
         showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Lihat Data Santri';
       }
     });
 
     document.getElementById('topupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const alertEl = document.getElementById('topupAlert');
+      const btn = document.getElementById('btnTopupSubmit');
       const nominal = Number(document.getElementById('topupNominal').value || 0);
       const metode = document.getElementById('topupMetode').value;
       const catatan = document.getElementById('topupCatatan').value.trim();
 
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
@@ -749,13 +895,22 @@
         renderDashboard(refreshed);
       } catch (err) {
         showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ajukan Top-Up';
       }
     });
 
     document.getElementById('btnRefresh').addEventListener('click', async () => {
       if (!session.nis) return;
-      const data = await loadWaliData(session.nis, session.pin);
-      renderDashboard(data);
+      const btn = document.getElementById('btnRefresh');
+      btn.textContent = 'Memuat...';
+      try {
+        const data = await loadWaliData(session.nis, session.pin);
+        renderDashboard(data);
+      } finally {
+        btn.textContent = 'Muat Ulang';
+      }
     });
 
     document.getElementById('btnGoTopup').addEventListener('click', () => switchTab('topup'));
@@ -788,6 +943,7 @@
         const target = nav.dataset.nav;
         if (target === 'tagihan') switchTab('tagihan');
         else if (target === 'topup') switchTab('topup');
+        else if (target === 'profil') switchTab('profil');
         else switchTab('transaksi');
       });
     });
