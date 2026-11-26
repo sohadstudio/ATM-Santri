@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Santri - Kasir NFC & QR</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f3f4f6; color: #111827; padding: 16px; }
+    .container { max-width: 520px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .muted { color: #6b7280; font-size: 13px; margin: 0; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
+    input, select, button {
+      width: 100%; padding: 11px 12px; border-radius: 10px;
+      border: 1px solid #d1d5db; font-size: 15px;
+    }
+    button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 10px; }
+    button:hover { opacity: 0.92; }
+    button.secondary { background: #e5e7eb; color: #111827; }
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+    .info-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; margin-top: 12px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; font-size: 14px; }
+    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 14px; font-weight: 500; }
+    .alert.ok { background: #dcfce7; color: #166534; }
+    .alert.err { background: #fee2e2; color: #991b1b; }
+    #qr-reader { margin-top: 10px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>ATM Santri — Kasir</h1>
+      <p class="muted">Tap NFC, scan QR kartu, atau input NIS santri</p>
+
+      <div class="row" style="margin-top: 12px;">
+        <button type="button" class="secondary" onclick="startWebNfc()">Tap NFC (Android)</button>
+        <button type="button" class="secondary" onclick="toggleQrScanner()">Scan QR</button>
+      </div>
+
+      <div id="qr-reader"></div>
+
+      <label for="nisInput">NIS Santri</label>
+      <div class="row">
+        <input type="text" id="nisInput" placeholder="Contoh: 2026001" />
+        <button type="button" onclick="cariSantri()" style="margin-top: 0; max-width: 110px;">Cek</button>
+      </div>
+
+      <div id="profilSantri" class="info-box" style="display: none;">
+        <div><strong id="sNama">-</strong> (<span id="sKamar">-</span>)</div>
+        <div class="info-grid">
+          <div>Saldo: <strong id="sSaldo">Rp0</strong></div>
+          <div>Sisa Limit: <strong id="sLimit">Rp0</strong></div>
+          <div>Status: <strong id="sStatus">-</strong></div>
+          <div>NIS: <strong id="sNis">-</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size: 17px; margin: 0 0 4px;">Input Transaksi</h2>
+      <label for="jenisTrx">Jenis Transaksi</label>
+      <select id="jenisTrx">
+        <option value="JAJAN">Jajan / Belanja (Potong Saldo & Limit)</option>
+        <option value="TARIK">Tarik Tunai (Potong Saldo & Limit)</option>
+        <option value="SETOR">Setor / Top-Up Saldo</option>
+      </select>
+
+      <label for="nominalTrx">Nominal (Rp)</label>
+      <input type="number" id="nominalTrx" placeholder="Contoh: 10000" min="100" step="100" />
+
+      <label for="pinTrx">PIN Santri</label>
+      <input type="password" id="pinTrx" inputmode="numeric" maxlength="8" placeholder="Masukkan PIN" />
+
+      <label for="petugasTrx">Nama Petugas / Kasir</label>
+      <input type="text" id="petugasTrx" placeholder="Contoh: Kasir Kantin 1" />
+
+      <button type="button" onclick="prosesTransaksi()">Proses Transaksi</button>
+      <div id="notif"></div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = 'GANTI_DENGAN_URL_WEB_APP_GAS';
+    let html5Qr = null;
+    let qrActive = false;
+
+    function rupiah(n) {
+      return 'Rp' + Number(n || 0).toLocaleString('id-ID');
+    }
+
+    function setNotif(msg, ok = true) {
+      const el = document.getElementById('notif');
+      el.className = 'alert ' + (ok ? 'ok' : 'err');
+      el.textContent = msg;
+    }
+
+    function extractNis(raw) {
+      const str = String(raw || '').trim();
+      try {
+        if (str.startsWith('http://') || str.startsWith('https://')) {
+          const u = new URL(str);
+          return (u.searchParams.get('nis') || '').trim();
+        }
+      } catch (_) {}
+      return str;
+    }
+
+    async function cariSantri(nisOverride = null) {
+      const inputEl = document.getElementById('nisInput');
+      const nis = extractNis(nisOverride !== null ? nisOverride : inputEl.value);
+      if (!nis) return setNotif('Masukkan atau tap NIS santri terlebih dahulu.', false);
+      inputEl.value = nis;
+
+      try {
+        const res = await fetch(`${GAS_URL}?action=getSantri&nis=${encodeURIComponent(nis)}`);
+        const data = await res.json();
+        if (!data.ok) {
+          document.getElementById('profilSantri').style.display = 'none';
+          return setNotif(data.message, false);
+        }
+        const s = data.santri;
+        document.getElementById('sNama').textContent = s.nama;
+        document.getElementById('sKamar').textContent = s.kamar;
+        document.getElementById('sSaldo').textContent = rupiah(s.saldo);
+        document.getElementById('sLimit').textContent = rupiah(s.sisa_limit);
+        document.getElementById('sStatus').textContent = s.status;
+        document.getElementById('sNis').textContent = s.nis;
+        document.getElementById('profilSantri').style.display = 'block';
+        setNotif(`Data ${s.nama} dimuat.`, true);
+      } catch (err) {
+        setNotif('Gagal menghubungi server: ' + err.message, false);
+      }
+    }
+
+    async function prosesTransaksi() {
+      const nis = document.getElementById('nisInput').value.trim();
+      const jenis = document.getElementById('jenisTrx').value;
+      const nominal = Number(document.getElementById('nominalTrx').value);
+      const pin = document.getElementById('pinTrx').value.trim();
+      const petugas = document.getElementById('petugasTrx').value.trim() || 'Kasir';
+
+      if (!nis) return setNotif('NIS santri belum diisi.', false);
+      if (!nominal || nominal <= 0) return setNotif('Nominal harus lebih dari 0.', false);
+      if (!pin) return setNotif('PIN santri wajib diisi.', false);
+
+      setNotif('Memproses transaksi...', true);
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ nis, jenis, nominal, pin, petugas })
+        });
+        const data = await res.json();
+        if (!data.ok) return setNotif(data.message, false);
+
+        document.getElementById('sSaldo').textContent = rupiah(data.saldo_akhir);
+        document.getElementById('sLimit').textContent = rupiah(data.sisa_limit);
+        document.getElementById('nominalTrx').value = '';
+        document.getElementById('pinTrx').value = '';
+        setNotif(`${data.message} Saldo akhir: ${rupiah(data.saldo_akhir)} | Sisa limit: ${rupiah(data.sisa_limit)}`, true);
+      } catch (err) {
+        setNotif('Gagal mengirim transaksi: ' + err.message, false);
+      }
+    }
+
+    async function startWebNfc() {
+      if (!('NDEFReader' in window)) {
+        return setNotif('Browser ini tidak mendukung Web NFC langsung. Gunakan tap link NFC ke browser atau scan QR.', false);
+      }
+      try {
+        const ndef = new NDEFReader();
+        await ndef.scan();
+        setNotif('Tempelkan kartu NFC santri ke belakang HP...', true);
+        ndef.onreading = (event) => {
+          for (const record of event.message.records) {
+            if (record.recordType === 'url' || record.recordType === 'text') {
+              const decoder = new TextDecoder(record.encoding || 'utf-8');
+              const text = decoder.decode(record.data);
+              cariSantri(text);
+              break;
+            }
+          }
+        };
+      } catch (err) {
+        setNotif('NFC gagal dijalankan: ' + err.message, false);
+      }
+    }
+
+    async function toggleQrScanner() {
+      const box = document.getElementById('qr-reader');
+      if (!qrActive) {
+        box.style.display = 'block';
+        html5Qr = new Html5Qrcode('qr-reader');
+        try {
+          await html5Qr.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            (decodedText) => {
+              toggleQrScanner();
+              cariSantri(decodedText);
+            }
+          );
+          qrActive = true;
+        } catch (err) {
+          setNotif('Kamera QR gagal dibuka: ' + err.message, false);
+        }
+      } else {
+        if (html5Qr) {
+          await html5Qr.stop();
+          await html5Qr.clear();
+        }
+        box.style.display = 'none';
+        qrActive = false;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const nisParam = params.get('nis');
+      if (nisParam) cariSantri(nisParam);
+    });
+  </script>
+</body>
+</html>
