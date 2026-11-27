@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -261,7 +262,7 @@
       margin: 0 auto;
       min-height: 100vh;
       background: var(--bg);
-      padding-bottom: 84px;
+      padding-bottom: 88px;
       position: relative;
     }
 
@@ -340,9 +341,10 @@
     }
 
     .greeting-name {
-      font-size: 19px;
+      font-size: 18.5px;
       font-weight: 800;
       margin-top: 2px;
+      line-height: 1.3;
     }
 
     .main-content {
@@ -529,31 +531,83 @@
       cursor: pointer;
     }
 
-    .tab-bar {
+    /* ================= MENU CEPAT GRID ================= */
+    .quick-menu-header {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
     }
 
-    .tab-btn {
-      border: 1px solid var(--line);
-      background: #ffffff;
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-family: inherit;
-      font-size: 12.5px;
+    .quick-menu-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .quick-menu-tag {
+      font-size: 11px;
       font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
+      color: var(--green-mid);
+      background: var(--green-light);
+      border: 1px solid var(--green-border);
+      padding: 3px 9px;
+      border-radius: 999px;
     }
 
-    .tab-btn.active {
-      background: var(--green-main);
-      color: #ffffff;
-      border-color: var(--green-main);
+    .quick-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px 10px;
+    }
+
+    .quick-item {
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px 2px;
+      border-radius: 12px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .quick-item:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    .quick-item.active .quick-icon-box {
+      box-shadow: 0 0 0 2px var(--green-main);
+    }
+
+    .quick-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .q-indigo { background: #eef2ff; color: #4f46e5; }
+    .q-emerald { background: #ecfdf5; color: #059669; }
+    .q-amber { background: #fffbeb; color: #d97706; }
+    .q-rose { background: #fff1f2; color: #e11d48; }
+    .q-sky { background: #f0f9ff; color: #0284c7; }
+    .q-violet { background: #f5f3ff; color: #7c3aed; }
+    .q-teal { background: #f0fdfa; color: #0d9488; }
+    .q-slate { background: #f1f5f9; color: #334155; }
+
+    .quick-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      line-height: 1.25;
     }
 
     /* ================= DETAIL METODE PEMBAYARAN TOP-UP ================= */
@@ -697,8 +751,8 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
-      padding: 12px 0;
+      gap: 12px;
+      padding: 11px 0;
       border-bottom: 1px solid #f1f5f9;
     }
 
@@ -710,6 +764,7 @@
     .item-title {
       font-size: 13.5px;
       font-weight: 700;
+      text-align: right;
     }
 
     .item-sub {
@@ -789,13 +844,17 @@
       background: transparent;
       color: var(--muted);
       font-family: inherit;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
       cursor: pointer;
+    }
+
+    .nav-item i {
+      font-size: 16px;
     }
 
     .nav-item.active {
@@ -886,7 +945,7 @@
 
       <div class="greeting-box">
         <div class="greeting-salutation">Assalamu'alaikum..</div>
-        <div id="greetingTitle" class="greeting-name">Wali Santri</div>
+        <div id="greetingTitle" class="greeting-name">Yth. Wali Santri dari Santri</div>
       </div>
     </header>
 
@@ -908,7 +967,7 @@
 
         <div class="total-saldo-banner">
           <div>
-            <div class="total-saldo-label">Total Saldo Tabungan</div>
+            <div class="total-saldo-label">Total Saldo</div>
             <div id="limitHarianInfo" class="total-saldo-sub">Limit harian: Rp 0</div>
           </div>
           <div id="valTotalSaldo" class="total-saldo-amount">Rp 0</div>
@@ -928,14 +987,49 @@
         <button id="btnGoTopup" class="btn-outline-green" type="button">Isi Saldo</button>
       </div>
 
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="transaksi" type="button">Transaksi</button>
-        <button class="tab-btn" data-tab="topup" type="button">Isi Saldo &amp; Status</button>
-        <button class="tab-btn" data-tab="tagihan" type="button">Tagihan</button>
-        <button class="tab-btn" data-tab="bantuan" type="button">Bantuan</button>
-        <button class="tab-btn" data-tab="profil" type="button">Profil</button>
+      <!-- ================= MENU CEPAT (GAYA GRID IKON) ================= -->
+      <div class="card">
+        <div class="quick-menu-header">
+          <span class="quick-menu-title">Menu Cepat</span>
+          <span class="quick-menu-tag">Wali Santri</span>
+        </div>
+        <div class="quick-menu-grid">
+          <button class="quick-item active" data-quick="transaksi" type="button">
+            <span class="quick-icon-box q-indigo"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            <span class="quick-label">Riwayat Transaksi</span>
+          </button>
+          <button class="quick-item" data-quick="topup" type="button">
+            <span class="quick-icon-box q-emerald"><i class="fa-solid fa-wallet"></i></span>
+            <span class="quick-label">Isi Saldo</span>
+          </button>
+          <button class="quick-item" data-quick="status-topup" type="button">
+            <span class="quick-icon-box q-amber"><i class="fa-solid fa-hourglass-half"></i></span>
+            <span class="quick-label">Status Top-Up</span>
+          </button>
+          <button class="quick-item" data-quick="tagihan" type="button">
+            <span class="quick-icon-box q-rose"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span class="quick-label">Info Tagihan</span>
+          </button>
+          <button class="quick-item" data-quick="limit" type="button">
+            <span class="quick-icon-box q-sky"><i class="fa-solid fa-sliders"></i></span>
+            <span class="quick-label">Atur Limit</span>
+          </button>
+          <button class="quick-item" data-quick="pin" type="button">
+            <span class="quick-icon-box q-violet"><i class="fa-solid fa-key"></i></span>
+            <span class="quick-label">Ubah PIN</span>
+          </button>
+          <button class="quick-item" data-quick="bantuan" type="button">
+            <span class="quick-icon-box q-teal"><i class="fa-solid fa-headset"></i></span>
+            <span class="quick-label">Bantuan Admin</span>
+          </button>
+          <button class="quick-item" data-quick="profil" type="button">
+            <span class="quick-icon-box q-slate"><i class="fa-solid fa-id-card"></i></span>
+            <span class="quick-label">Profil Santri</span>
+          </button>
+        </div>
       </div>
 
+      <!-- ================= PANEL TRANSAKSI ================= -->
       <div id="panelTransaksi" class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <h2 style="font-size: 14px; font-weight: 800;">Riwayat Transaksi Terakhir</h2>
@@ -944,6 +1038,7 @@
         <div id="listTransaksi"></div>
       </div>
 
+      <!-- ================= PANEL TOPUP ================= -->
       <div id="panelTopup" class="card hidden">
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">Ajukan Top-Up Saldo</h2>
         <form id="topupForm">
@@ -963,7 +1058,6 @@
             </select>
           </div>
 
-          <!-- Panel Detail Pembayaran & Rincian Biaya Admin (Muncul setelah pilih metode) -->
           <div id="paymentDetailPanel" class="payment-detail-box hidden">
             <div id="paymentDetailTitle" class="payment-detail-title"></div>
 
@@ -1010,11 +1104,12 @@
         </form>
         <div id="topupAlert" class="alert-box"></div>
 
-        <hr class="settings-divider" />
-        <h3 style="font-size: 13px; font-weight: 800; margin-bottom: 6px;">Status Pengajuan Top-Up</h3>
+        <hr id="topupStatusDivider" class="settings-divider" />
+        <h3 id="topupStatusTitle" style="font-size: 13px; font-weight: 800; margin-bottom: 6px;">Status Pengajuan Top-Up</h3>
         <div id="listTopup"></div>
       </div>
 
+      <!-- ================= PANEL TAGIHAN ================= -->
       <div id="panelTagihan" class="card hidden">
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 6px;">Informasi Tagihan</h2>
         <p style="font-size: 12.5px; color: var(--muted); line-height: 1.55;">
@@ -1023,6 +1118,7 @@
         </p>
       </div>
 
+      <!-- ================= PANEL BANTUAN ================= -->
       <div id="panelBantuan" class="card hidden">
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Bantuan &amp; Layanan Admin</h2>
         <p style="font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 12px;">
@@ -1030,14 +1126,17 @@
         </p>
         <div class="list-item" style="padding-top:4px; margin-bottom:12px;">
           <div>
-            <div class="item-title">Admin / Bendahara Pondok</div>
+            <div class="item-title" style="text-align:left;">Admin / Bendahara Pondok</div>
             <div class="item-sub">PPS. NU Raden Keunyeup • Layanan Wali Santri</div>
           </div>
           <span class="badge-soft">WhatsApp</span>
         </div>
-        <button id="btnWaPengurus" class="btn-primary" type="button">Hubungi Pengurus / Bendahara (WA)</button>
+        <button id="btnWaPengurus" class="btn-primary" type="button">
+          <i class="fa-brands fa-whatsapp" style="margin-right:6px;"></i>Hubungi Pengurus / Bendahara (WA)
+        </button>
       </div>
 
+      <!-- ================= PANEL PROFIL ================= -->
       <div id="panelProfil" class="card hidden">
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">Detail Profil Santri</h2>
         <div class="list-item">
@@ -1053,6 +1152,18 @@
           <span id="detailKamar" class="item-title">-</span>
         </div>
         <div class="list-item">
+          <span class="item-sub">Nama Ayah</span>
+          <span id="detailNamaAyah" class="item-title">-</span>
+        </div>
+        <div class="list-item">
+          <span class="item-sub">Nama Ibu</span>
+          <span id="detailNamaIbu" class="item-title">-</span>
+        </div>
+        <div class="list-item">
+          <span class="item-sub">Alamat</span>
+          <span id="detailAlamat" class="item-title">-</span>
+        </div>
+        <div class="list-item">
           <span class="item-sub">Limit Jajan Harian</span>
           <span id="detailLimit" class="item-title">Rp 0</span>
         </div>
@@ -1061,52 +1172,61 @@
           <span id="detailStatus" class="item-title">AKTIF</span>
         </div>
 
-        <hr class="settings-divider" />
-        <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Limit Jajan Harian</h3>
-        <form id="limitForm">
-          <div class="field-group">
-            <label class="field-label" for="inputNewLimit">Limit Jajan Harian Baru (Rp)</label>
-            <input id="inputNewLimit" class="input-control" type="number" min="0" step="1000" placeholder="Contoh: 15000" required />
-          </div>
-          <button id="btnSaveLimit" class="btn-primary" type="submit">Simpan Limit Harian</button>
-        </form>
-        <div id="limitAlert" class="alert-box"></div>
+        <hr id="limitSectionDivider" class="settings-divider" />
+        <div id="limitSection">
+          <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Limit Jajan Harian</h3>
+          <form id="limitForm">
+            <div class="field-group">
+              <label class="field-label" for="inputNewLimit">Limit Jajan Harian Baru (Rp)</label>
+              <input id="inputNewLimit" class="input-control" type="number" min="0" step="1000" placeholder="Contoh: 15000" required />
+            </div>
+            <button id="btnSaveLimit" class="btn-primary" type="submit">Simpan Limit Harian</button>
+          </form>
+          <div id="limitAlert" class="alert-box"></div>
+        </div>
 
-        <hr class="settings-divider" />
-        <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Ubah PIN Santri</h3>
-        <form id="pinForm">
-          <div class="field-group">
-            <label class="field-label" for="inputCurrentPin">PIN Saat Ini</label>
-            <input id="inputCurrentPin" class="input-control" type="password" placeholder="Masukkan PIN lama" required />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="inputNewPin">PIN Baru</label>
-            <input id="inputNewPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Minimal 4 karakter/angka" required />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="inputConfirmPin">Konfirmasi PIN Baru</label>
-            <input id="inputConfirmPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Ulangi PIN baru" required />
-          </div>
-          <button id="btnSavePin" class="btn-primary" type="submit">Simpan PIN Baru</button>
-        </form>
-        <div id="pinAlert" class="alert-box"></div>
+        <hr id="pinSectionDivider" class="settings-divider" />
+        <div id="pinSection">
+          <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Ubah PIN Santri</h3>
+          <form id="pinForm">
+            <div class="field-group">
+              <label class="field-label" for="inputCurrentPin">PIN Saat Ini</label>
+              <input id="inputCurrentPin" class="input-control" type="password" placeholder="Masukkan PIN lama" required />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="inputNewPin">PIN Baru</label>
+              <input id="inputNewPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Minimal 4 karakter/angka" required />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="inputConfirmPin">Konfirmasi PIN Baru</label>
+              <input id="inputConfirmPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Ulangi PIN baru" required />
+            </div>
+            <button id="btnSavePin" class="btn-primary" type="submit">Simpan PIN Baru</button>
+          </form>
+          <div id="pinAlert" class="alert-box"></div>
+        </div>
       </div>
     </main>
 
     <nav class="bottom-nav">
       <button class="nav-item active" data-nav="beranda" type="button">
+        <i class="fa-solid fa-house"></i>
         <span>Beranda</span>
       </button>
       <button class="nav-item" data-nav="tagihan" type="button">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
         <span>Tagihan</span>
       </button>
       <button class="nav-item" data-nav="topup" type="button">
+        <i class="fa-solid fa-wallet"></i>
         <span>Isi Saldo</span>
       </button>
       <button class="nav-item" data-nav="bantuan" type="button">
+        <i class="fa-solid fa-circle-question"></i>
         <span>Bantuan</span>
       </button>
       <button class="nav-item" data-nav="profil" type="button">
+        <i class="fa-solid fa-user"></i>
         <span>Profil</span>
       </button>
     </nav>
@@ -1499,10 +1619,13 @@
       el.className = 'alert-box show ' + (isOk ? 'ok' : 'err');
     }
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach((b) => {
-        b.classList.toggle('active', b.dataset.tab === tabName);
+    function setQuickActive(quickKey) {
+      document.querySelectorAll('.quick-item').forEach((q) => {
+        q.classList.toggle('active', q.dataset.quick === quickKey);
       });
+    }
+
+    function switchTab(tabName, options = {}) {
       document.querySelectorAll('.nav-item').forEach((n) => {
         const navTarget = n.dataset.nav;
         const isActive =
@@ -1516,6 +1639,43 @@
       document.getElementById('panelTagihan').classList.toggle('hidden', tabName !== 'tagihan');
       document.getElementById('panelBantuan').classList.toggle('hidden', tabName !== 'bantuan');
       document.getElementById('panelProfil').classList.toggle('hidden', tabName !== 'profil');
+
+      if (tabName === 'profil') {
+        const focusTarget = options.focusProfil || 'all';
+        const limitSec = document.getElementById('limitSection');
+        const pinSec = document.getElementById('pinSection');
+        const limitDiv = document.getElementById('limitSectionDivider');
+        const pinDiv = document.getElementById('pinSectionDivider');
+
+        if (focusTarget === 'limit') {
+          limitSec.classList.remove('hidden');
+          limitDiv.classList.remove('hidden');
+          pinSec.classList.add('hidden');
+          pinDiv.classList.add('hidden');
+        } else if (focusTarget === 'pin') {
+          pinSec.classList.remove('hidden');
+          pinDiv.classList.remove('hidden');
+          limitSec.classList.add('hidden');
+          limitDiv.classList.add('hidden');
+        } else {
+          limitSec.classList.remove('hidden');
+          pinSec.classList.remove('hidden');
+          limitDiv.classList.remove('hidden');
+          pinDiv.classList.remove('hidden');
+        }
+      }
+
+      if (options.scrollToPanel) {
+        const targetPanel = document.getElementById(
+          tabName === 'transaksi' ? 'panelTransaksi' :
+          tabName === 'topup' ? 'panelTopup' :
+          tabName === 'tagihan' ? 'panelTagihan' :
+          tabName === 'bantuan' ? 'panelBantuan' : 'panelProfil'
+        );
+        if (targetPanel) {
+          targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
     }
 
     function normalizePhotoUrl(rawUrl) {
@@ -1557,7 +1717,8 @@
 
     function renderDashboard(data) {
       const s = data.santri || {};
-      document.getElementById('greetingTitle').textContent = 'Wali dari ' + (s.nama || 'Santri');
+      const namaSantri = s.nama || 'Santri';
+      document.getElementById('greetingTitle').textContent = 'Yth. Wali Santri dari ' + namaSantri;
       document.getElementById('santriNama').textContent = s.nama || '-';
       document.getElementById('santriMeta').textContent = 'NIS: ' + (s.nis || '-') + ' • ' + (s.kamar || '-');
 
@@ -1589,6 +1750,9 @@
       document.getElementById('detailNama').textContent = s.nama || '-';
       document.getElementById('detailNis').textContent = s.nis || '-';
       document.getElementById('detailKamar').textContent = s.kamar || '-';
+      document.getElementById('detailNamaAyah').textContent = s.nama_ayah || s.ayah || '-';
+      document.getElementById('detailNamaIbu').textContent = s.nama_ibu || s.ibu || '-';
+      document.getElementById('detailAlamat').textContent = s.alamat || '-';
       document.getElementById('detailLimit').textContent = formatRp(limitHarian);
       document.getElementById('detailStatus').textContent = st;
 
@@ -1609,7 +1773,7 @@
           return `
             <div class="list-item">
               <div>
-                <div class="item-title">${t.jenis || 'TRANSAKSI'} • ${t.petugas || 'Sistem'}</div>
+                <div class="item-title" style="text-align:left;">${t.jenis || 'TRANSAKSI'} • ${t.petugas || 'Sistem'}</div>
                 <div class="item-sub">${t.waktu || ''} • ${t.id_trx || ''}</div>
               </div>
               <div class="item-right" style="color:${color};">
@@ -1635,7 +1799,7 @@
           return `
             <div class="list-item">
               <div>
-                <div class="item-title">${item.metode || 'Top-Up'} <span class="${badgeClass}">${stUp}</span></div>
+                <div class="item-title" style="text-align:left;">${item.metode || 'Top-Up'} <span class="${badgeClass}">${stUp}</span></div>
                 <div class="item-sub">${item.waktu || ''}${item.catatan ? ' • ' + item.catatan : ''}</div>
                 ${item.catatan_admin ? `<div class="item-sub" style="color:var(--ink);">Admin: ${item.catatan_admin}</div>` : ''}
               </div>
@@ -1895,7 +2059,10 @@
       }
     });
 
-    document.getElementById('btnGoTopup').addEventListener('click', () => switchTab('topup'));
+    document.getElementById('btnGoTopup').addEventListener('click', () => {
+      setQuickActive('topup');
+      switchTab('topup', { scrollToPanel: true });
+    });
 
     document.getElementById('btnWaPengurus').addEventListener('click', () => {
       const namaSantri = document.getElementById('santriNama').textContent;
@@ -1913,27 +2080,53 @@
       session = { nis: '', pin: '' };
       document.getElementById('appShell').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('greetingTitle').textContent = 'Wali Santri';
+      document.getElementById('greetingTitle').textContent = 'Yth. Wali Santri dari Santri';
       document.getElementById('loginForm').reset();
       document.getElementById('limitForm').reset();
       document.getElementById('pinForm').reset();
       document.getElementById('inputPin').type = 'password';
       updatePaymentMethodView();
+      setQuickActive('transaksi');
       switchTab('transaksi');
     });
 
-    document.querySelectorAll('.tab-btn').forEach((btn) => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    document.querySelectorAll('.quick-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const q = item.dataset.quick;
+        setQuickActive(q);
+        if (q === 'transaksi') switchTab('transaksi', { scrollToPanel: true });
+        else if (q === 'topup') switchTab('topup', { scrollToPanel: true });
+        else if (q === 'status-topup') {
+          switchTab('topup', { scrollToPanel: true });
+          const stTitle = document.getElementById('topupStatusTitle');
+          if (stTitle) stTitle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (q === 'tagihan') switchTab('tagihan', { scrollToPanel: true });
+        else if (q === 'limit') switchTab('profil', { focusProfil: 'limit', scrollToPanel: true });
+        else if (q === 'pin') switchTab('profil', { focusProfil: 'pin', scrollToPanel: true });
+        else if (q === 'bantuan') switchTab('bantuan', { scrollToPanel: true });
+        else if (q === 'profil') switchTab('profil', { focusProfil: 'all', scrollToPanel: true });
+      });
     });
 
     document.querySelectorAll('.nav-item').forEach((nav) => {
       nav.addEventListener('click', () => {
         const target = nav.dataset.nav;
-        if (target === 'tagihan') switchTab('tagihan');
-        else if (target === 'topup') switchTab('topup');
-        else if (target === 'bantuan') switchTab('bantuan');
-        else if (target === 'profil') switchTab('profil');
-        else switchTab('transaksi');
+        if (target === 'tagihan') {
+          setQuickActive('tagihan');
+          switchTab('tagihan');
+        } else if (target === 'topup') {
+          setQuickActive('topup');
+          switchTab('topup');
+        } else if (target === 'bantuan') {
+          setQuickActive('bantuan');
+          switchTab('bantuan');
+        } else if (target === 'profil') {
+          setQuickActive('profil');
+          switchTab('profil', { focusProfil: 'all' });
+        } else {
+          setQuickActive('transaksi');
+          switchTab('transaksi');
+        }
       });
     });
   </script>
