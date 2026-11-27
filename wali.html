@@ -1028,6 +1028,7 @@
     const LOGO_SEABANK_URL = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/SeaBank.svg';
     const LOGO_DANA_URL = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Logo_dana_blue.svg/1920px-Logo_dana_blue.svg.png';
     const QRIS_BG_URL = 'https://raw.githubusercontent.com/sohadstudio/assets/refs/heads/main/background%20qris.png';
+    const WALI_SESSION_KEY = 'sohad_wali_session_rk';
 
     /* KONFIGURASI & GENERATOR QRIS DINAMIS (DARI SOHAD STUDIO) */
     const QRIS_STATIS_SOHAD =
@@ -1067,6 +1068,30 @@
 
     let qrisCountdownInterval = null;
     let session = { nis: '', pin: '' };
+
+    function saveWaliSession(nis, pin) {
+      try {
+        localStorage.setItem(WALI_SESSION_KEY, JSON.stringify({ nis, pin }));
+      } catch (_) {}
+    }
+
+    function clearWaliSession() {
+      try {
+        localStorage.removeItem(WALI_SESSION_KEY);
+      } catch (_) {}
+    }
+
+    function getSavedWaliSession() {
+      try {
+        const raw = localStorage.getItem(WALI_SESSION_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.nis && parsed.pin) {
+          return { nis: String(parsed.nis), pin: String(parsed.pin) };
+        }
+      } catch (_) {}
+      return null;
+    }
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
@@ -1282,7 +1307,6 @@
 
     function setMethodLogo(src, altText, fallbackText) {
       const box = document.getElementById('methodLogoBox');
-      const img = document.getElementById('methodLogoImg');
       box.innerHTML = '<img id="methodLogoImg" src="" alt="" />';
       const newImg = document.getElementById('methodLogoImg');
       newImg.alt = altText;
@@ -1496,8 +1520,26 @@
       return json;
     }
 
+    async function autoLoginWali() {
+      const saved = getSavedWaliSession();
+      if (!saved) return;
+
+      const alertEl = document.getElementById('loginAlert');
+      try {
+        const data = await loadWaliData(saved.nis, saved.pin);
+        session = { nis: saved.nis, pin: saved.pin };
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appShell').classList.remove('hidden');
+        alertEl.classList.remove('show');
+        renderDashboard(data);
+      } catch (_) {
+        clearWaliSession();
+      }
+    }
+
     initPonpesLogo();
     updatePaymentMethodView();
+    autoLoginWali();
 
     document.getElementById('topupNominal').addEventListener('input', updatePaymentSummary);
     document.getElementById('topupMetode').addEventListener('change', updatePaymentMethodView);
@@ -1534,6 +1576,7 @@
       try {
         const data = await loadWaliData(nis, pin);
         session = { nis, pin };
+        saveWaliSession(nis, pin);
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appShell').classList.remove('hidden');
         alertEl.classList.remove('show');
@@ -1616,6 +1659,7 @@
 
     document.getElementById('btnLogout').addEventListener('click', () => {
       clearQRISWali();
+      clearWaliSession();
       session = { nis: '', pin: '' };
       document.getElementById('appShell').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
