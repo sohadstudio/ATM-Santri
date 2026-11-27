@@ -21,6 +21,7 @@
       --card: #ffffff;
       --line: #e2e8f0;
       --danger: #dc2626;
+      --accent-red: #ef4444;
     }
 
     * {
@@ -40,7 +41,7 @@
       display: none !important;
     }
 
-    /* ================= LOGIN SCREEN (FRESH, TANPA BOTTOM NAV) ================= */
+    /* ================= LOGIN SCREEN ================= */
     .login-screen {
       max-width: 460px;
       margin: 0 auto;
@@ -537,6 +538,119 @@
       border-color: var(--green-main);
     }
 
+    /* ================= DETAIL METODE PEMBAYARAN TOP-UP ================= */
+    .payment-detail-box {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .payment-detail-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .rek-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .rek-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+      margin-bottom: 4px;
+    }
+
+    .rek-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .rek-number {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: 0.3px;
+    }
+
+    .rek-holder {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn-copy-rek {
+      background: #141414;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .rincian-box {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      font-size: 12.5px;
+    }
+
+    .rincian-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .rincian-row strong {
+      color: var(--ink);
+    }
+
+    .rincian-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 13.5px;
+      font-weight: 800;
+    }
+
+    .rincian-total-val {
+      color: var(--accent-red);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .payment-note {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
     .list-item {
       display: flex;
       align-items: flex-start;
@@ -754,7 +868,7 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="transaksi" type="button">Transaksi</button>
-        <button class="tab-btn" data-tab="topup" type="button">Isi Saldo & Status</button>
+        <button class="tab-btn" data-tab="topup" type="button">Isi Saldo &amp; Status</button>
         <button class="tab-btn" data-tab="tagihan" type="button">Tagihan</button>
         <button class="tab-btn" data-tab="profil" type="button">Profil</button>
       </div>
@@ -771,21 +885,59 @@
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 10px;">Ajukan Top-Up Saldo</h2>
         <form id="topupForm">
           <div class="field-group">
-            <label class="field-label" for="topupNominal">Nominal Top-Up (Rp)</label>
+            <label class="field-label" for="topupNominal">Nominal Top-Up Saldo (Rp)</label>
             <input id="topupNominal" class="input-control" type="number" min="1000" step="1000" placeholder="Contoh: 50000" required />
           </div>
+
           <div class="field-group">
             <label class="field-label" for="topupMetode">Metode Pembayaran</label>
             <select id="topupMetode" class="select-control">
-              <option value="Transfer Bank">Transfer Bank</option>
-              <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+              <option value="Transfer Bank SeaBank">Transfer Bank SeaBank</option>
+              <option value="DANA / E-Wallet">DANA / E-Wallet</option>
+              <option value="QRIS">QRIS</option>
               <option value="Titip Tunai Pengurus">Titip Tunai Pengurus</option>
             </select>
           </div>
+
+          <!-- Panel Detail Pembayaran & Rincian Biaya Admin -->
+          <div id="paymentDetailPanel" class="payment-detail-box">
+            <div id="paymentDetailTitle" class="payment-detail-title">Transfer Bank SeaBank</div>
+
+            <div id="rekBox" class="rek-card">
+              <div>
+                <div id="rekBadge" class="rek-badge">SEABANK</div>
+                <div id="rekLabel" class="rek-label">Nomor Rekening SeaBank</div>
+                <div id="rekNumber" class="rek-number">123456789</div>
+                <div id="rekHolder" class="rek-holder">a.n. Shofwatul Hady</div>
+              </div>
+              <button id="btnCopyRek" class="btn-copy-rek" type="button">Salin</button>
+            </div>
+
+            <div class="rincian-box">
+              <div class="rincian-row">
+                <span>Saldo Top-Up Santri</span>
+                <strong id="rincianSaldo">Rp 0</strong>
+              </div>
+              <div class="rincian-row">
+                <span>Biaya Admin (Rp 2.500 / kelipatan Rp 50.000)</span>
+                <strong id="rincianAdmin">Rp 0</strong>
+              </div>
+              <div class="rincian-total">
+                <span>Total Bayar</span>
+                <span id="rincianTotal" class="rincian-total-val">Rp 0</span>
+              </div>
+            </div>
+
+            <p id="paymentNote" class="payment-note">
+              Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Konfirmasi bukti transfer melalui WhatsApp pengurus setelah pengajuan dikirim.
+            </p>
+          </div>
+
           <div class="field-group">
             <label class="field-label" for="topupCatatan">Catatan / Nama Pengirim</label>
             <input id="topupCatatan" class="input-control" type="text" placeholder="Contoh: a.n. Wali Santri" />
           </div>
+
           <button id="btnTopupSubmit" class="btn-primary" type="submit">Ajukan Top-Up</button>
         </form>
         <div id="topupAlert" class="alert-box"></div>
@@ -853,6 +1005,61 @@
     let session = { nis: '', pin: '' };
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+    // Biaya admin Rp 2.500 untuk setiap kelipatan Rp 50.000
+    function hitungBiayaAdmin(nominal) {
+      const n = Math.max(0, Number(nominal || 0));
+      if (n <= 0) return 0;
+      const kelipatan50rb = Math.ceil(n / 50000);
+      return kelipatan50rb * 2500;
+    }
+
+    function updatePaymentSummary() {
+      const nominal = Math.max(0, Number(document.getElementById('topupNominal').value || 0));
+      const admin = hitungBiayaAdmin(nominal);
+      const totalBayar = nominal + admin;
+
+      document.getElementById('rincianSaldo').textContent = formatRp(nominal);
+      document.getElementById('rincianAdmin').textContent = formatRp(admin);
+      document.getElementById('rincianTotal').textContent = formatRp(totalBayar);
+    }
+
+    function updatePaymentMethodView() {
+      const metode = document.getElementById('topupMetode').value;
+      const titleEl = document.getElementById('paymentDetailTitle');
+      const rekBox = document.getElementById('rekBox');
+      const badgeEl = document.getElementById('rekBadge');
+      const labelEl = document.getElementById('rekLabel');
+      const numEl = document.getElementById('rekNumber');
+      const holderEl = document.getElementById('rekHolder');
+      const noteEl = document.getElementById('paymentNote');
+
+      titleEl.textContent = metode;
+
+      if (metode === 'Transfer Bank SeaBank') {
+        rekBox.classList.remove('hidden');
+        badgeEl.textContent = 'SEABANK';
+        labelEl.textContent = 'Nomor Rekening SeaBank';
+        numEl.textContent = '123456789';
+        holderEl.textContent = 'a.n. Shofwatul Hady';
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Transfer sesuai Total Bayar lalu konfirmasi ke pengurus.';
+      } else if (metode === 'DANA / E-Wallet') {
+        rekBox.classList.remove('hidden');
+        badgeEl.textContent = 'DANA / E-WALLET';
+        labelEl.textContent = 'Nomor Tujuan E-Wallet';
+        numEl.textContent = '123456789';
+        holderEl.textContent = 'a.n. Shofwatul Hady';
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Sertakan nama santri di catatan transfer.';
+      } else if (metode === 'QRIS') {
+        rekBox.classList.add('hidden');
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Bayar sesuai Total Bayar dan lampirkan bukti bayar ke pengurus.';
+      } else {
+        rekBox.classList.add('hidden');
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Serahkan uang tunai sesuai Total Bayar ke pengurus/bendahara.';
+      }
+
+      updatePaymentSummary();
+    }
 
     function initPonpesLogo() {
       document.querySelectorAll('.ponpes-logo-img').forEach((img) => {
@@ -1011,6 +1218,22 @@
     }
 
     initPonpesLogo();
+    updatePaymentMethodView();
+
+    document.getElementById('topupNominal').addEventListener('input', updatePaymentSummary);
+    document.getElementById('topupMetode').addEventListener('change', updatePaymentMethodView);
+
+    document.getElementById('btnCopyRek').addEventListener('click', async () => {
+      const rekText = document.getElementById('rekNumber').textContent.trim();
+      const btn = document.getElementById('btnCopyRek');
+      try {
+        await navigator.clipboard.writeText(rekText);
+        btn.textContent = 'Tersalin';
+        setTimeout(() => { btn.textContent = 'Salin'; }, 1500);
+      } catch (_) {
+        btn.textContent = 'Salin';
+      }
+    });
 
     document.getElementById('togglePin').addEventListener('change', (e) => {
       document.getElementById('inputPin').type = e.target.checked ? 'text' : 'password';
@@ -1046,7 +1269,14 @@
       const btn = document.getElementById('btnTopupSubmit');
       const nominal = Number(document.getElementById('topupNominal').value || 0);
       const metode = document.getElementById('topupMetode').value;
-      const catatan = document.getElementById('topupCatatan').value.trim();
+      const catatanInput = document.getElementById('topupCatatan').value.trim();
+      const admin = hitungBiayaAdmin(nominal);
+      const totalBayar = nominal + admin;
+      const catatanGabung = [
+        catatanInput,
+        `Admin: ${formatRp(admin)}`,
+        `Total Bayar: ${formatRp(totalBayar)}`
+      ].filter(Boolean).join(' • ');
 
       btn.disabled = true;
       btn.textContent = 'Mengirim...';
@@ -1060,7 +1290,7 @@
             pin: session.pin,
             nominal,
             metode,
-            catatan
+            catatan: catatanGabung
           })
         });
         const json = await res.json();
@@ -1068,6 +1298,7 @@
 
         showAlert(alertEl, json.message + ' (' + (json.id_topup || '') + ')', true);
         document.getElementById('topupForm').reset();
+        updatePaymentMethodView();
         const refreshed = await loadWaliData(session.nis, session.pin);
         renderDashboard(refreshed);
       } catch (err) {
@@ -1107,6 +1338,7 @@
       document.getElementById('greetingTitle').textContent = 'Wali Santri';
       document.getElementById('loginForm').reset();
       document.getElementById('inputPin').type = 'password';
+      updatePaymentMethodView();
     });
 
     document.querySelectorAll('.tab-btn').forEach((btn) => {
