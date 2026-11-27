@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --green-dark: #064e3b;
@@ -608,30 +609,6 @@
       flex-shrink: 0;
     }
 
-    .qris-preview-box {
-      margin-top: 10px;
-      background: #ffffff;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .qris-preview-box img {
-      width: 100%;
-      max-width: 220px;
-      height: auto;
-      border-radius: 10px;
-      display: block;
-      margin: 0 auto 8px;
-    }
-
-    .qris-caption {
-      font-size: 11.5px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
     .rincian-box {
       margin-top: 12px;
       padding-top: 10px;
@@ -937,10 +914,7 @@
               <button id="btnCopyRek" class="btn-copy-rek" type="button">Salin</button>
             </div>
 
-            <div id="qrisBox" class="qris-preview-box hidden">
-              <img id="qrisImg" src="" alt="QRIS Pembayaran" />
-              <div class="qris-caption">Scan QRIS sesuai Total Bayar • a.n. Shofwatul Hady</div>
-            </div>
+            <div id="qris-container" class="hidden" style="margin-top:10px;"></div>
 
             <div class="rincian-box">
               <div class="rincian-row">
@@ -1030,9 +1004,45 @@
     const WA_PENGURUS = '6285111311421';
     const LOGO_PONPES_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png';
     const LOGO_PONPES_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png?raw=true';
-    const QRIS_IMG_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/shofwatul%20hady.png';
-    const QRIS_IMG_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/shofwatul%20hady.png?raw=true';
+    const QRIS_BG_URL = 'https://raw.githubusercontent.com/sohadstudio/assets/refs/heads/main/background%20qris.png';
 
+    /* KONFIGURASI & GENERATOR QRIS DINAMIS (DARI SOHAD STUDIO) */
+    const QRIS_STATIS_SOHAD =
+      "00020101021126610016ID.CO.SHOPEE.WWW01189360091800242119780208242119780303UMI" +
+      "51440014ID.CO.QRIS.WWW0215ID10266420735340303UMI5204733853033605802ID" +
+      "5912Sohad Studio6009TANGERANG61051552062070703A016304A4F4";
+
+    function hitungCRC16(str) {
+      let crc = 0xFFFF;
+      for (let c = 0; c < str.length; c++) {
+        crc ^= str.charCodeAt(c) << 8;
+        for (let i = 0; i < 8; i++) {
+          if (crc & 0x8000) {
+            crc = (crc << 1) ^ 0x1021;
+          } else {
+            crc = crc << 1;
+          }
+        }
+      }
+      const hex = (crc & 0xFFFF).toString(16).toUpperCase();
+      return ("0000" + hex).slice(-4);
+    }
+
+    function buatStringQRISDinamis(nominal) {
+      let qris = QRIS_STATIS_SOHAD.slice(0, -4);
+      qris = qris.replace("010211", "010212");
+
+      const nominalStr = Math.round(Number(nominal || 0)).toString();
+      const panjangNominal = ("00" + nominalStr.length).slice(-2);
+      const tagNominal = "54" + panjangNominal + nominalStr;
+
+      const posisiNegara = qris.indexOf("5802ID");
+      const qrisBaru = qris.slice(0, posisiNegara) + tagNominal + qris.slice(posisiNegara);
+
+      return qrisBaru + hitungCRC16(qrisBaru);
+    }
+
+    let qrisCountdownInterval = null;
     let session = { nis: '', pin: '' };
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
@@ -1044,6 +1054,183 @@
       return kelipatan50rb * 2500;
     }
 
+    function clearQRISWali() {
+      if (qrisCountdownInterval) {
+        clearInterval(qrisCountdownInterval);
+        qrisCountdownInterval = null;
+      }
+      const qrisContainer = document.getElementById('qris-container');
+      if (qrisContainer) {
+        qrisContainer.innerHTML = '';
+        qrisContainer.classList.add('hidden');
+      }
+    }
+
+    function renderQRISWali(angkaTotal) {
+      const qrisContainer = document.getElementById('qris-container');
+      const paySelect = document.getElementById('topupMetode');
+      if (!qrisContainer || !paySelect) return;
+
+      clearQRISWali();
+
+      const total = Math.max(0, Math.round(Number(angkaTotal || 0)));
+      if (paySelect.value !== 'QRIS' || total <= 0) return;
+
+      qrisContainer.classList.remove('hidden');
+      const stringQR = buatStringQRISDinamis(total);
+      const durasiDetik = 5 * 60;
+      const waktuBerakhir = Date.now() + (durasiDetik * 1000);
+
+      qrisContainer.innerHTML =
+        '<div id="qris-dynamic-box">' +
+          '<div id="qris-timer-bar" style="max-width:300px; margin:0 auto 8px auto; padding:8px 12px; border-radius:8px; background:#fff8e6; border:1px solid #f0c36d; color:#7a4f01; font-size:12px; font-weight:600; text-align:center;">' +
+            'Batas waktu bayar QRIS: <span id="qris-countdown-text" style="font-weight:800; color:#b42318;">05:00</span>' +
+          '</div>' +
+          '<div id="qris-card-wrapper">' +
+            '<div style="position:relative; width:100%; max-width:300px; aspect-ratio: 715 / 1000; margin:0 auto; background-color:#ffffff; background-image:url(\'' + QRIS_BG_URL + '\'); background-size:100% 100%; background-position:center; background-repeat:no-repeat; border:1px solid #dcdcdc; border-radius:10px; box-sizing:border-box; overflow:hidden; text-align:center;">' +
+              '<div style="position:absolute; top:14.5%; left:0; width:100%; line-height:1.25;">' +
+                '<div style="font-size:16px; font-weight:800; color:#000000; letter-spacing:0.3px;">SOHAD STUDIO</div>' +
+                '<div style="font-size:10px; color:#555555; margin-top:2px;">NMID: ID1026642073534</div>' +
+                '<div style="font-size:12.5px; color:#141414; margin-top:8px;">Nominal Tagihan: <b style="font-weight:800; font-size:14px; color:#000000;">Rp ' + total.toLocaleString('id-ID') + '</b></div>' +
+              '</div>' +
+              '<div style="position:absolute; top:32.5%; left:50%; transform:translateX(-50%); width:66%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;">' +
+                '<div id="qris-canvas" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:center; margin-top:10px;">' +
+              '<button type="button" id="btn-unduh-qris" style="width:100%; max-width:300px; background-color:#111111; color:#ffffff; border:none; padding:10px 16px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-sizing:border-box;">' +
+                '⬇ Unduh QRIS' +
+              '</button>' +
+            '</div>' +
+            '<div style="font-size:11px; color:#555; margin-top:8px; text-align:center; line-height:1.4;">Scan langsung atau klik <b>Unduh QRIS</b> untuk bayar lewat DANA, GoPay, ShopeePay, OVO, atau M-Banking. Nominal otomatis terkunci. Setelah bayar, klik <b>Ajukan Top-Up</b>.</div>' +
+          '</div>' +
+          '<div id="qris-expired-box" style="display:none; max-width:300px; margin:10px auto 0 auto; padding:14px; border-radius:10px; background:#fef2f2; border:1px solid #fecaca; text-align:center;">' +
+            '<div style="font-size:13px; font-weight:700; color:#991b1b; margin-bottom:6px;">Waktu QRIS (5 menit) telah habis</div>' +
+            '<div style="font-size:11.5px; color:#7f1d1d; margin-bottom:10px;">Silakan buat ulang kode QRIS jika Anda belum menyelesaikan pembayaran.</div>' +
+            '<button type="button" id="btn-refresh-qris" style="width:100%; background-color:#111111; color:#ffffff; border:none; padding:9px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Buat Ulang QRIS</button>' +
+          '</div>' +
+        '</div>';
+
+      const canvasEl = document.getElementById('qris-canvas');
+      if (canvasEl && typeof QRCode !== 'undefined') {
+        canvasEl.innerHTML = '';
+        new QRCode(canvasEl, {
+          text: stringQR,
+          width: 185,
+          height: 185,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      function updateCountdown() {
+        const sisaMs = waktuBerakhir - Date.now();
+        const sisaDetik = Math.max(0, Math.ceil(sisaMs / 1000));
+        const menit = Math.floor(sisaDetik / 60);
+        const detik = sisaDetik % 60;
+        const teksWaktu = ('0' + menit).slice(-2) + ':' + ('0' + detik).slice(-2);
+
+        const countdownEl = document.getElementById('qris-countdown-text');
+        if (countdownEl) countdownEl.textContent = teksWaktu;
+
+        if (sisaDetik <= 0) {
+          clearInterval(qrisCountdownInterval);
+          qrisCountdownInterval = null;
+
+          const cardWrapper = document.getElementById('qris-card-wrapper');
+          const expiredBox = document.getElementById('qris-expired-box');
+          const timerBar = document.getElementById('qris-timer-bar');
+
+          if (cardWrapper) cardWrapper.style.display = 'none';
+          if (expiredBox) expiredBox.style.display = 'block';
+          if (timerBar) {
+            timerBar.style.background = '#fef2f2';
+            timerBar.style.borderColor = '#fecaca';
+            timerBar.style.color = '#991b1b';
+            timerBar.innerHTML = 'Status QRIS: <b>Kedaluwarsa</b>';
+          }
+        }
+      }
+
+      updateCountdown();
+      qrisCountdownInterval = setInterval(updateCountdown, 1000);
+
+      const refreshBtn = document.getElementById('btn-refresh-qris');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          updatePaymentSummary();
+        });
+      }
+
+      const dlBtn = document.getElementById('btn-unduh-qris');
+      if (dlBtn) {
+        dlBtn.addEventListener('click', function () {
+          const btn = this;
+          btn.innerText = 'Memproses...';
+
+          const canvas = document.createElement('canvas');
+          canvas.width = 715;
+          canvas.height = 1000;
+          const ctx = canvas.getContext('2d');
+          const webFont = window.getComputedStyle(document.body).fontFamily || "'Plus Jakarta Sans', sans-serif";
+
+          const bgImg = new Image();
+          bgImg.crossOrigin = 'anonymous';
+          bgImg.src = QRIS_BG_URL;
+
+          bgImg.onload = function () {
+            ctx.drawImage(bgImg, 0, 0, 715, 1000);
+
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'center';
+            ctx.font = '800 38px ' + webFont;
+            ctx.fillText('SOHAD STUDIO', 357.5, 178);
+
+            ctx.fillStyle = '#555555';
+            ctx.font = '400 23px ' + webFont;
+            ctx.fillText('NMID: ID1026642073534', 357.5, 212);
+
+            const teksLabel = 'Nominal Tagihan: ';
+            const teksNominal = 'Rp ' + total.toLocaleString('id-ID');
+
+            ctx.font = '400 29px ' + webFont;
+            const lebarLabel = ctx.measureText(teksLabel).width;
+
+            ctx.font = '800 33px ' + webFont;
+            const lebarNominal = ctx.measureText(teksNominal).width;
+
+            const totalLebar = lebarLabel + lebarNominal;
+            const titikMulaiX = (715 - totalLebar) / 2;
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#141414';
+            ctx.font = '400 29px ' + webFont;
+            ctx.fillText(teksLabel, titikMulaiX, 258);
+
+            ctx.fillStyle = '#000000';
+            ctx.font = '800 33px ' + webFont;
+            ctx.fillText(teksNominal, titikMulaiX + lebarLabel, 258);
+
+            const qrSource = canvasEl.querySelector('canvas') || canvasEl.querySelector('img');
+            if (qrSource) {
+              ctx.drawImage(qrSource, 121.5, 325, 472, 472);
+            }
+
+            const link = document.createElement('a');
+            link.download = 'QRIS-TopUp-Rp' + total + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            btn.innerHTML = '⬇ Unduh QRIS';
+          };
+
+          bgImg.onerror = function () {
+            alert('Gagal memuat template gambar QRIS.');
+            btn.innerHTML = '⬇ Unduh QRIS';
+          };
+        });
+      }
+    }
+
     function updatePaymentSummary() {
       const nominal = Math.max(0, Number(document.getElementById('topupNominal').value || 0));
       const admin = hitungBiayaAdmin(nominal);
@@ -1052,14 +1239,14 @@
       document.getElementById('rincianSaldo').textContent = formatRp(nominal);
       document.getElementById('rincianAdmin').textContent = formatRp(admin);
       document.getElementById('rincianTotal').textContent = formatRp(totalBayar);
+
+      renderQRISWali(totalBayar);
     }
 
     function updatePaymentMethodView() {
       const metode = document.getElementById('topupMetode').value;
       const titleEl = document.getElementById('paymentDetailTitle');
       const rekBox = document.getElementById('rekBox');
-      const qrisBox = document.getElementById('qrisBox');
-      const qrisImg = document.getElementById('qrisImg');
       const badgeEl = document.getElementById('rekBadge');
       const labelEl = document.getElementById('rekLabel');
       const numEl = document.getElementById('rekNumber');
@@ -1070,7 +1257,6 @@
 
       if (metode === 'Transfer Bank SeaBank') {
         rekBox.classList.remove('hidden');
-        qrisBox.classList.add('hidden');
         badgeEl.textContent = 'SEABANK';
         labelEl.textContent = 'Nomor Rekening SeaBank';
         numEl.textContent = '123456789';
@@ -1078,7 +1264,6 @@
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Transfer sesuai Total Bayar lalu konfirmasi ke pengurus.';
       } else if (metode === 'DANA / E-Wallet') {
         rekBox.classList.remove('hidden');
-        qrisBox.classList.add('hidden');
         badgeEl.textContent = 'DANA / E-WALLET';
         labelEl.textContent = 'Nomor Tujuan E-Wallet';
         numEl.textContent = '123456789';
@@ -1086,17 +1271,9 @@
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Sertakan nama santri di catatan transfer.';
       } else if (metode === 'QRIS') {
         rekBox.classList.add('hidden');
-        qrisBox.classList.remove('hidden');
-        qrisImg.onerror = () => {
-          if (qrisImg.src !== QRIS_IMG_FALLBACK) {
-            qrisImg.src = QRIS_IMG_FALLBACK;
-          }
-        };
-        qrisImg.src = QRIS_IMG_URL;
-        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Scan QRIS di atas sesuai Total Bayar lalu lampirkan bukti bayar ke pengurus.';
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Nominal QRIS di bawah otomatis terkunci sesuai Total Bayar.';
       } else {
         rekBox.classList.add('hidden');
-        qrisBox.classList.add('hidden');
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Serahkan uang tunai sesuai Total Bayar ke pengurus/bendahara.';
       }
 
@@ -1270,8 +1447,12 @@
       const btn = document.getElementById('btnCopyRek');
       try {
         await navigator.clipboard.writeText(rekText);
-        btn.textContent = 'Tersalin';
-        setTimeout(() => { btn.textContent = 'Salin'; }, 1500);
+        btn.textContent = 'Tersalin!';
+        btn.style.backgroundColor = '#16a34a';
+        setTimeout(() => {
+          btn.textContent = 'Salin';
+          btn.style.backgroundColor = '#141414';
+        }, 2000);
       } catch (_) {
         btn.textContent = 'Salin';
       }
@@ -1374,6 +1555,7 @@
     });
 
     document.getElementById('btnLogout').addEventListener('click', () => {
+      clearQRISWali();
       session = { nis: '', pin: '' };
       document.getElementById('appShell').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
