@@ -3,225 +3,424 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATM Santri - Kasir NFC & QR</title>
+  <title>ATM Santri — Kasir</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #f3f4f6; color: #111827; padding: 16px; }
-    .container { max-width: 520px; margin: 0 auto; }
-    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    .muted { color: #6b7280; font-size: 13px; margin: 0; }
-    label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 6px; }
-    input, select, button {
-      width: 100%; padding: 11px 12px; border-radius: 10px;
-      border: 1px solid #d1d5db; font-size: 15px;
+    :root {
+      --ink: #141414;
+      --muted: #64748b;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --ok-bg: #ecfdf5;
+      --ok-ink: #065f46;
+      --err-bg: #fef2f2;
+      --err-ink: #b91c1c;
     }
-    button { background: #141414; color: #fff; font-weight: 600; border: none; cursor: pointer; margin-top: 10px; }
-    button:hover { opacity: 0.92; }
-    button.secondary { background: #e5e7eb; color: #111827; }
-    .row { display: flex; gap: 8px; }
-    .row > * { flex: 1; }
-    .info-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; margin-top: 12px; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; font-size: 14px; }
-    .alert { padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 14px; font-weight: 500; }
-    .alert.ok { background: #dcfce7; color: #166534; }
-    .alert.err { background: #fee2e2; color: #991b1b; }
-    #qr-reader { margin-top: 10px; display: none; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 14px 48px;
+    }
+
+    .wrap {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .btn-scan-qr {
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #e5e7eb;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-scan-qr:hover {
+      background: #dbe0e6;
+    }
+
+    .qr-reader-box {
+      margin-top: 12px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #000000;
+    }
+
+    .field-group {
+      margin-top: 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .nis-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-control,
+    .select-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .input-control:focus,
+    .select-control:focus {
+      border-color: var(--ink);
+    }
+
+    .btn-dark {
+      background: var(--ink);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-dark:hover {
+      opacity: 0.92;
+    }
+
+    .btn-dark:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-cek {
+      padding: 0 18px;
+      flex-shrink: 0;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px 14px;
+    }
+
+    .santri-info {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .alert-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .alert-box.show {
+      display: block;
+    }
+
+    .alert-box.ok {
+      background: var(--ok-bg);
+      color: var(--ok-ink);
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-box.err {
+      background: var(--err-bg);
+      color: var(--err-ink);
+      border: 1px solid #fecaca;
+    }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>ATM Santri — Kasir</h1>
-      <p class="muted">Tap NFC, scan QR kartu, atau input NIS santri</p>
+  <div class="wrap">
+    <!-- Kartu Atas: Scan QR & Input NIS -->
+    <section class="card">
+      <div class="title">ATM Santri — Kasir</div>
+      <div class="subtitle">Scan QR kartu atau input NIS santri</div>
 
-      <div class="row" style="margin-top: 12px;">
-        <button type="button" class="secondary" onclick="startWebNfc()">Tap NFC (Android)</button>
-        <button type="button" class="secondary" onclick="toggleQrScanner()">Scan QR</button>
+      <button id="btnToggleQr" class="btn-scan-qr" type="button">Scan QR</button>
+      <div id="qrReaderWrap" class="qr-reader-box hidden">
+        <div id="qrReader"></div>
       </div>
 
-      <div id="qr-reader"></div>
-
-      <label for="nisInput">NIS Santri</label>
-      <div class="row">
-        <input type="text" id="nisInput" placeholder="Contoh: 2026001" />
-        <button type="button" onclick="cariSantri()" style="margin-top: 0; max-width: 110px;">Cek</button>
-      </div>
-
-      <div id="profilSantri" class="info-box" style="display: none;">
-        <div><strong id="sNama">-</strong> (<span id="sKamar">-</span>)</div>
-        <div class="info-grid">
-          <div>Saldo: <strong id="sSaldo">Rp0</strong></div>
-          <div>Sisa Limit: <strong id="sLimit">Rp0</strong></div>
-          <div>Status: <strong id="sStatus">-</strong></div>
-          <div>NIS: <strong id="sNis">-</strong></div>
+      <div class="field-group">
+        <label class="field-label" for="inputNis">NIS Santri</label>
+        <div class="nis-row">
+          <input id="inputNis" class="input-control" type="text" placeholder="Contoh: 2026001" />
+          <button id="btnCekNis" class="btn-dark btn-cek" type="button">Cek</button>
         </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2 style="font-size: 17px; margin: 0 0 4px;">Input Transaksi</h2>
-      <label for="jenisTrx">Jenis Transaksi</label>
-      <select id="jenisTrx">
-        <option value="JAJAN">Jajan / Belanja (Potong Saldo & Limit)</option>
-        <option value="TARIK">Tarik Tunai (Potong Saldo & Limit)</option>
-        <option value="SETOR">Setor / Top-Up Saldo</option>
-      </select>
+      <div id="santriInfoBox" class="santri-info hidden"></div>
+      <div id="cekAlert" class="alert-box"></div>
+    </section>
 
-      <label for="nominalTrx">Nominal (Rp)</label>
-      <input type="number" id="nominalTrx" placeholder="Contoh: 10000" min="100" step="100" />
+    <!-- Kartu Bawah: Input Transaksi -->
+    <section class="card">
+      <div class="title">Input Transaksi</div>
 
-      <label for="pinTrx">PIN Santri</label>
-      <input type="password" id="pinTrx" inputmode="numeric" maxlength="8" placeholder="Masukkan PIN" />
+      <form id="trxForm">
+        <div class="field-group">
+          <label class="field-label" for="selectJenis">Jenis Transaksi</label>
+          <select id="selectJenis" class="select-control">
+            <option value="JAJAN">Jajan / Belanja (Potong Saldo &amp; Limit)</option>
+            <option value="TARIK">Tarik Tunai (Potong Saldo &amp; Limit)</option>
+            <option value="SETOR">Setor Tunai (Tambah Saldo)</option>
+          </select>
+        </div>
 
-      <label for="petugasTrx">Nama Petugas / Kasir</label>
-      <input type="text" id="petugasTrx" placeholder="Contoh: Kasir Kantin 1" />
+        <div class="field-group">
+          <label class="field-label" for="inputNominal">Nominal (Rp)</label>
+          <input id="inputNominal" class="input-control" type="number" min="500" step="500" placeholder="Contoh: 10000" required />
+        </div>
 
-      <button type="button" onclick="prosesTransaksi()">Proses Transaksi</button>
-      <div id="notif"></div>
-    </div>
+        <div class="field-group">
+          <label class="field-label" for="inputPin">PIN Santri</label>
+          <input id="inputPin" class="input-control" type="password" placeholder="Masukkan PIN" required />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="inputPetugas">Nama Petugas / Kasir</label>
+          <input id="inputPetugas" class="input-control" type="text" placeholder="Contoh: Kasir Kantin 1" required />
+        </div>
+
+        <button id="btnProses" class="btn-dark btn-submit" type="submit">Proses Transaksi</button>
+      </form>
+
+      <div id="trxAlert" class="alert-box"></div>
+    </section>
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
-    let html5Qr = null;
-    let qrActive = false;
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmF1tEUXWsAP6YNHXnj9mrXXZS12dzJ301GK_j3eawmDSsHnSQglh34PYY84Jajfp-/exec';
 
-    function rupiah(n) {
-      return 'Rp' + Number(n || 0).toLocaleString('id-ID');
-    }
+    let html5QrCode = null;
+    let isQrRunning = false;
 
-    function setNotif(msg, ok = true) {
-      const el = document.getElementById('notif');
-      el.className = 'alert ' + (ok ? 'ok' : 'err');
+    const formatRp = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
+
+    function showAlert(el, msg, isOk) {
       el.textContent = msg;
+      el.className = 'alert-box show ' + (isOk ? 'ok' : 'err');
     }
 
-    function extractNis(raw) {
-      const str = String(raw || '').trim();
+    function extractNisFromScan(rawText) {
+      const txt = String(rawText || '').trim();
+      if (!txt) return '';
       try {
-        if (str.startsWith('http://') || str.startsWith('https://')) {
-          const u = new URL(str);
-          return (u.searchParams.get('nis') || '').trim();
-        }
+        const parsed = JSON.parse(txt);
+        if (parsed && parsed.nis) return String(parsed.nis).trim();
       } catch (_) {}
-      return str;
+      return txt;
     }
 
-    async function cariSantri(nisOverride = null) {
-      const inputEl = document.getElementById('nisInput');
-      const nis = extractNis(nisOverride !== null ? nisOverride : inputEl.value);
-      if (!nis) return setNotif('Masukkan atau tap NIS santri terlebih dahulu.', false);
-      inputEl.value = nis;
+    async function cekDataSantri(nis) {
+      const cleanNis = String(nis || '').trim();
+      const alertEl = document.getElementById('cekAlert');
+      const infoBox = document.getElementById('santriInfoBox');
+
+      if (!cleanNis) {
+        showAlert(alertEl, 'Masukkan atau scan NIS santri terlebih dahulu.', false);
+        return;
+      }
+
+      const btn = document.getElementById('btnCekNis');
+      btn.disabled = true;
+      btn.textContent = '...';
 
       try {
-        const res = await fetch(`${GAS_URL}?action=getSantri&nis=${encodeURIComponent(nis)}`);
-        const data = await res.json();
-        if (!data.ok) {
-          document.getElementById('profilSantri').style.display = 'none';
-          return setNotif(data.message, false);
+        const res = await fetch(`${SCRIPT_URL}?action=getSantri&nis=${encodeURIComponent(cleanNis)}`);
+        const json = await res.json();
+        if (!json.ok || !json.santri) {
+          throw new Error(json.message || 'Santri tidak ditemukan.');
         }
-        const s = data.santri;
-        document.getElementById('sNama').textContent = s.nama;
-        document.getElementById('sKamar').textContent = s.kamar;
-        document.getElementById('sSaldo').textContent = rupiah(s.saldo);
-        document.getElementById('sLimit').textContent = rupiah(s.sisa_limit);
-        document.getElementById('sStatus').textContent = s.status;
-        document.getElementById('sNis').textContent = s.nis;
-        document.getElementById('profilSantri').style.display = 'block';
-        setNotif(`Data ${s.nama} dimuat.`, true);
+
+        const s = json.santri;
+        infoBox.innerHTML = `
+          <div><strong>${s.nama}</strong> (${s.nis}) • ${s.kamar || '-'}</div>
+          <div>Status: <strong>${s.status}</strong> • Saldo: <strong>${formatRp(s.saldo)}</strong></div>
+          <div>Sisa Limit Hari Ini: <strong>${formatRp(s.sisa_limit)}</strong> dari ${formatRp(s.limit_harian)}</div>
+        `;
+        infoBox.classList.remove('hidden');
+        alertEl.classList.remove('show');
       } catch (err) {
-        setNotif('Gagal menghubungi server: ' + err.message, false);
+        infoBox.classList.add('hidden');
+        showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Cek';
       }
     }
 
-    async function prosesTransaksi() {
-      const nis = document.getElementById('nisInput').value.trim();
-      const jenis = document.getElementById('jenisTrx').value;
-      const nominal = Number(document.getElementById('nominalTrx').value);
-      const pin = document.getElementById('pinTrx').value.trim();
-      const petugas = document.getElementById('petugasTrx').value.trim() || 'Kasir';
-
-      if (!nis) return setNotif('NIS santri belum diisi.', false);
-      if (!nominal || nominal <= 0) return setNotif('Nominal harus lebih dari 0.', false);
-      if (!pin) return setNotif('PIN santri wajib diisi.', false);
-
-      setNotif('Memproses transaksi...', true);
-
-      try {
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ nis, jenis, nominal, pin, petugas })
-        });
-        const data = await res.json();
-        if (!data.ok) return setNotif(data.message, false);
-
-        document.getElementById('sSaldo').textContent = rupiah(data.saldo_akhir);
-        document.getElementById('sLimit').textContent = rupiah(data.sisa_limit);
-        document.getElementById('nominalTrx').value = '';
-        document.getElementById('pinTrx').value = '';
-        setNotif(`${data.message} Saldo akhir: ${rupiah(data.saldo_akhir)} | Sisa limit: ${rupiah(data.sisa_limit)}`, true);
-      } catch (err) {
-        setNotif('Gagal mengirim transaksi: ' + err.message, false);
+    async function stopQrScanner() {
+      if (html5QrCode && isQrRunning) {
+        try {
+          await html5QrCode.stop();
+        } catch (_) {}
       }
-    }
-
-    async function startWebNfc() {
-      if (!('NDEFReader' in window)) {
-        return setNotif('Browser ini tidak mendukung Web NFC langsung. Gunakan tap link NFC ke browser atau scan QR.', false);
-      }
-      try {
-        const ndef = new NDEFReader();
-        await ndef.scan();
-        setNotif('Tempelkan kartu NFC santri ke belakang HP...', true);
-        ndef.onreading = (event) => {
-          for (const record of event.message.records) {
-            if (record.recordType === 'url' || record.recordType === 'text') {
-              const decoder = new TextDecoder(record.encoding || 'utf-8');
-              const text = decoder.decode(record.data);
-              cariSantri(text);
-              break;
-            }
-          }
-        };
-      } catch (err) {
-        setNotif('NFC gagal dijalankan: ' + err.message, false);
-      }
+      isQrRunning = false;
+      document.getElementById('qrReaderWrap').classList.add('hidden');
+      document.getElementById('btnToggleQr').textContent = 'Scan QR';
     }
 
     async function toggleQrScanner() {
-      const box = document.getElementById('qr-reader');
-      if (!qrActive) {
-        box.style.display = 'block';
-        html5Qr = new Html5Qrcode('qr-reader');
-        try {
-          await html5Qr.start(
-            { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
-            (decodedText) => {
-              toggleQrScanner();
-              cariSantri(decodedText);
-            }
-          );
-          qrActive = true;
-        } catch (err) {
-          setNotif('Kamera QR gagal dibuka: ' + err.message, false);
-        }
-      } else {
-        if (html5Qr) {
-          await html5Qr.stop();
-          await html5Qr.clear();
-        }
-        box.style.display = 'none';
-        qrActive = false;
+      if (isQrRunning) {
+        await stopQrScanner();
+        return;
+      }
+
+      document.getElementById('qrReaderWrap').classList.remove('hidden');
+      document.getElementById('btnToggleQr').textContent = 'Tutup Kamera QR';
+
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode('qrReader');
+      }
+
+      try {
+        isQrRunning = true;
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          async (decodedText) => {
+            const nisHasil = extractNisFromScan(decodedText);
+            document.getElementById('inputNis').value = nisHasil;
+            await stopQrScanner();
+            await cekDataSantri(nisHasil);
+          },
+          () => {}
+        );
+      } catch (err) {
+        isQrRunning = false;
+        document.getElementById('qrReaderWrap').classList.add('hidden');
+        document.getElementById('btnToggleQr').textContent = 'Scan QR';
+        showAlert(document.getElementById('cekAlert'), 'Kamera tidak dapat diakses: ' + err.message, false);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const nisParam = params.get('nis');
-      if (nisParam) cariSantri(nisParam);
+    document.getElementById('btnToggleQr').addEventListener('click', toggleQrScanner);
+    document.getElementById('btnCekNis').addEventListener('click', () => {
+      cekDataSantri(document.getElementById('inputNis').value);
+    });
+
+    document.getElementById('inputNis').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        cekDataSantri(document.getElementById('inputNis').value);
+      }
+    });
+
+    document.getElementById('trxForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nis = document.getElementById('inputNis').value.trim();
+      const jenis = document.getElementById('selectJenis').value;
+      const nominal = Number(document.getElementById('inputNominal').value || 0);
+      const pin = document.getElementById('inputPin').value.trim();
+      const petugas = document.getElementById('inputPetugas').value.trim();
+      const alertEl = document.getElementById('trxAlert');
+      const btn = document.getElementById('btnProses');
+
+      if (!nis) {
+        showAlert(alertEl, 'NIS santri wajib diisi.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'transaksi',
+            nis,
+            jenis,
+            nominal,
+            pin,
+            petugas
+          })
+        });
+        const json = await res.json();
+        if (!json.ok) {
+          throw new Error(json.message || 'Transaksi gagal.');
+        }
+
+        showAlert(
+          alertEl,
+          `${json.message} (${json.id_trx || '-'}) • Saldo Akhir: ${formatRp(json.saldo_akhir)}`,
+          true
+        );
+        document.getElementById('inputNominal').value = '';
+        document.getElementById('inputPin').value = '';
+        await cekDataSantri(nis);
+      } catch (err) {
+        showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Proses Transaksi';
+      }
     });
   </script>
 </body>
