@@ -541,7 +541,7 @@
 
     /* ================= DETAIL METODE PEMBAYARAN TOP-UP ================= */
     .payment-detail-box {
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 14px;
@@ -549,14 +549,14 @@
     }
 
     .payment-detail-title {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       color: var(--ink);
       margin-bottom: 10px;
     }
 
     .rek-card {
-      background: #ffffff;
+      background: #f8fafc;
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 11px 12px;
@@ -566,16 +566,34 @@
       gap: 10px;
     }
 
-    .rek-badge {
-      display: inline-block;
-      font-size: 10.5px;
+    .rek-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .method-logo-box {
+      width: 54px;
+      height: 38px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      flex-shrink: 0;
+      font-size: 10px;
       font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 6px;
-      background: #fff7ed;
-      color: #c2410c;
-      border: 1px solid #fed7aa;
-      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .method-logo-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .rek-label {
@@ -584,15 +602,15 @@
     }
 
     .rek-number {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--ink);
       letter-spacing: 0.3px;
     }
 
     .rek-holder {
-      font-size: 11.5px;
-      color: var(--muted);
+      font-size: 11px;
+      color: #334155;
       margin-top: 2px;
     }
 
@@ -892,7 +910,8 @@
 
           <div class="field-group">
             <label class="field-label" for="topupMetode">Metode Pembayaran</label>
-            <select id="topupMetode" class="select-control">
+            <select id="topupMetode" class="select-control" required>
+              <option value="">-- Pilih Metode Pembayaran --</option>
               <option value="Transfer Bank SeaBank">Transfer Bank SeaBank</option>
               <option value="DANA / E-Wallet">DANA / E-Wallet</option>
               <option value="QRIS">QRIS</option>
@@ -900,16 +919,20 @@
             </select>
           </div>
 
-          <!-- Panel Detail Pembayaran & Rincian Biaya Admin -->
-          <div id="paymentDetailPanel" class="payment-detail-box">
-            <div id="paymentDetailTitle" class="payment-detail-title">Transfer Bank SeaBank</div>
+          <!-- Panel Detail Pembayaran & Rincian Biaya Admin (Muncul setelah pilih metode) -->
+          <div id="paymentDetailPanel" class="payment-detail-box hidden">
+            <div id="paymentDetailTitle" class="payment-detail-title"></div>
 
-            <div id="rekBox" class="rek-card">
-              <div>
-                <div id="rekBadge" class="rek-badge">SEABANK</div>
-                <div id="rekLabel" class="rek-label">Nomor Rekening SeaBank</div>
-                <div id="rekNumber" class="rek-number">123456789</div>
-                <div id="rekHolder" class="rek-holder">a.n. Shofwatul Hady</div>
+            <div id="rekBox" class="rek-card hidden">
+              <div class="rek-left">
+                <div id="methodLogoBox" class="method-logo-box">
+                  <img id="methodLogoImg" src="" alt="Logo Metode Pembayaran" />
+                </div>
+                <div style="min-width:0;">
+                  <div id="rekLabel" class="rek-label">Nomor Rekening</div>
+                  <div id="rekNumber" class="rek-number">123456789</div>
+                  <div id="rekHolder" class="rek-holder">a.n. Shofwatul Hady</div>
+                </div>
               </div>
               <button id="btnCopyRek" class="btn-copy-rek" type="button">Salin</button>
             </div>
@@ -931,9 +954,7 @@
               </div>
             </div>
 
-            <p id="paymentNote" class="payment-note">
-              Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Konfirmasi bukti transfer melalui WhatsApp pengurus setelah pengajuan dikirim.
-            </p>
+            <p id="paymentNote" class="payment-note"></p>
           </div>
 
           <div class="field-group">
@@ -1004,6 +1025,8 @@
     const WA_PENGURUS = '6285111311421';
     const LOGO_PONPES_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png';
     const LOGO_PONPES_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png?raw=true';
+    const LOGO_SEABANK_URL = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/SeaBank.svg';
+    const LOGO_DANA_URL = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Logo_dana_blue.svg/1920px-Logo_dana_blue.svg.png';
     const QRIS_BG_URL = 'https://raw.githubusercontent.com/sohadstudio/assets/refs/heads/main/background%20qris.png';
 
     /* KONFIGURASI & GENERATOR QRIS DINAMIS (DARI SOHAD STUDIO) */
@@ -1073,11 +1096,14 @@
 
       clearQRISWali();
 
+      if (paySelect.value !== 'QRIS') return;
+
       const total = Math.max(0, Math.round(Number(angkaTotal || 0)));
-      if (paySelect.value !== 'QRIS' || total <= 0) return;
+      const nominalQr = total > 0 ? total : 50000;
+      const labelNominal = total > 0 ? 'Rp ' + total.toLocaleString('id-ID') : 'Rp 0 (Isi nominal dulu)';
 
       qrisContainer.classList.remove('hidden');
-      const stringQR = buatStringQRISDinamis(total);
+      const stringQR = buatStringQRISDinamis(nominalQr);
       const durasiDetik = 5 * 60;
       const waktuBerakhir = Date.now() + (durasiDetik * 1000);
 
@@ -1088,12 +1114,12 @@
           '</div>' +
           '<div id="qris-card-wrapper">' +
             '<div style="position:relative; width:100%; max-width:300px; aspect-ratio: 715 / 1000; margin:0 auto; background-color:#ffffff; background-image:url(\'' + QRIS_BG_URL + '\'); background-size:100% 100%; background-position:center; background-repeat:no-repeat; border:1px solid #dcdcdc; border-radius:10px; box-sizing:border-box; overflow:hidden; text-align:center;">' +
-              '<div style="position:absolute; top:14.5%; left:0; width:100%; line-height:1.25;">' +
+              '<div style="position:absolute; top:14.5%; left:0; width:100%; line-height:1.25; background:rgba(255,255,255,0.88); padding:4px 0;">' +
                 '<div style="font-size:16px; font-weight:800; color:#000000; letter-spacing:0.3px;">SOHAD STUDIO</div>' +
                 '<div style="font-size:10px; color:#555555; margin-top:2px;">NMID: ID1026642073534</div>' +
-                '<div style="font-size:12.5px; color:#141414; margin-top:8px;">Nominal Tagihan: <b style="font-weight:800; font-size:14px; color:#000000;">Rp ' + total.toLocaleString('id-ID') + '</b></div>' +
+                '<div style="font-size:12.5px; color:#141414; margin-top:6px;">Nominal Tagihan: <b style="font-weight:800; font-size:14px; color:#000000;">' + labelNominal + '</b></div>' +
               '</div>' +
-              '<div style="position:absolute; top:32.5%; left:50%; transform:translateX(-50%); width:66%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;">' +
+              '<div style="position:absolute; top:32.5%; left:50%; transform:translateX(-50%); width:66%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#ffffff; border-radius:8px;">' +
                 '<div id="qris-canvas" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>' +
               '</div>' +
             '</div>' +
@@ -1116,8 +1142,8 @@
         canvasEl.innerHTML = '';
         new QRCode(canvasEl, {
           text: stringQR,
-          width: 185,
-          height: 185,
+          width: 175,
+          height: 175,
           correctLevel: QRCode.CorrectLevel.M
         });
       }
@@ -1164,6 +1190,10 @@
       const dlBtn = document.getElementById('btn-unduh-qris');
       if (dlBtn) {
         dlBtn.addEventListener('click', function () {
+          if (total <= 0) {
+            alert('Isi nominal top-up terlebih dahulu sebelum mengunduh QRIS.');
+            return;
+          }
           const btn = this;
           btn.innerText = 'Memproses...';
 
@@ -1177,8 +1207,12 @@
           bgImg.crossOrigin = 'anonymous';
           bgImg.src = QRIS_BG_URL;
 
-          bgImg.onload = function () {
-            ctx.drawImage(bgImg, 0, 0, 715, 1000);
+          const drawCard = (hasBg) => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 715, 1000);
+            if (hasBg) {
+              ctx.drawImage(bgImg, 0, 0, 715, 1000);
+            }
 
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
@@ -1223,10 +1257,8 @@
             btn.innerHTML = '⬇ Unduh QRIS';
           };
 
-          bgImg.onerror = function () {
-            alert('Gagal memuat template gambar QRIS.');
-            btn.innerHTML = '⬇ Unduh QRIS';
-          };
+          bgImg.onload = () => drawCard(true);
+          bgImg.onerror = () => drawCard(false);
         });
       }
     }
@@ -1240,32 +1272,59 @@
       document.getElementById('rincianAdmin').textContent = formatRp(admin);
       document.getElementById('rincianTotal').textContent = formatRp(totalBayar);
 
-      renderQRISWali(totalBayar);
+      const metode = document.getElementById('topupMetode').value;
+      if (metode === 'QRIS') {
+        renderQRISWali(totalBayar);
+      } else {
+        clearQRISWali();
+      }
+    }
+
+    function setMethodLogo(src, altText, fallbackText) {
+      const box = document.getElementById('methodLogoBox');
+      const img = document.getElementById('methodLogoImg');
+      box.innerHTML = '<img id="methodLogoImg" src="" alt="" />';
+      const newImg = document.getElementById('methodLogoImg');
+      newImg.alt = altText;
+      newImg.onerror = () => {
+        box.textContent = fallbackText;
+      };
+      newImg.src = src;
     }
 
     function updatePaymentMethodView() {
       const metode = document.getElementById('topupMetode').value;
+      const panel = document.getElementById('paymentDetailPanel');
       const titleEl = document.getElementById('paymentDetailTitle');
       const rekBox = document.getElementById('rekBox');
-      const badgeEl = document.getElementById('rekBadge');
       const labelEl = document.getElementById('rekLabel');
       const numEl = document.getElementById('rekNumber');
       const holderEl = document.getElementById('rekHolder');
       const noteEl = document.getElementById('paymentNote');
 
+      if (!metode) {
+        panel.classList.add('hidden');
+        rekBox.classList.add('hidden');
+        clearQRISWali();
+        return;
+      }
+
+      panel.classList.remove('hidden');
       titleEl.textContent = metode;
 
       if (metode === 'Transfer Bank SeaBank') {
         rekBox.classList.remove('hidden');
-        badgeEl.textContent = 'SEABANK';
+        clearQRISWali();
+        setMethodLogo(LOGO_SEABANK_URL, 'SeaBank', 'SEABANK');
         labelEl.textContent = 'Nomor Rekening SeaBank';
         numEl.textContent = '123456789';
         holderEl.textContent = 'a.n. Shofwatul Hady';
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Transfer sesuai Total Bayar lalu konfirmasi ke pengurus.';
       } else if (metode === 'DANA / E-Wallet') {
         rekBox.classList.remove('hidden');
-        badgeEl.textContent = 'DANA / E-WALLET';
-        labelEl.textContent = 'Nomor Tujuan E-Wallet';
+        clearQRISWali();
+        setMethodLogo(LOGO_DANA_URL, 'DANA', 'DANA');
+        labelEl.textContent = 'Nomor DANA / E-Wallet';
         numEl.textContent = '123456789';
         holderEl.textContent = 'a.n. Shofwatul Hady';
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Sertakan nama santri di catatan transfer.';
@@ -1274,6 +1333,7 @@
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Nominal QRIS di bawah otomatis terkunci sesuai Total Bayar.';
       } else {
         rekBox.classList.add('hidden');
+        clearQRISWali();
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Serahkan uang tunai sesuai Total Bayar ke pengurus/bendahara.';
       }
 
