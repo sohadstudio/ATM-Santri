@@ -42,6 +42,35 @@
       display: none !important;
     }
 
+    /* ================= SPLASH SCREEN ================= */
+    .boot-splash {
+      max-width: 460px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: linear-gradient(155deg, #064e3b 0%, #059669 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .boot-spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.28);
+      border-top-color: #ffffff;
+      border-radius: 999px;
+      animation: spinSplash 0.8s linear infinite;
+    }
+
+    @keyframes spinSplash {
+      to { transform: rotate(360deg); }
+    }
+
     /* ================= LOGIN SCREEN ================= */
     .login-screen {
       max-width: 460px;
@@ -347,6 +376,11 @@
       background: var(--green-mid);
     }
 
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
     .profile-top {
       display: flex;
       align-items: center;
@@ -481,31 +515,14 @@
       color: var(--ink);
     }
 
-    .action-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
     .btn-outline-green {
-      padding: 10px 12px;
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px 14px;
       border-radius: 12px;
       border: 1.5px solid var(--green-main);
       background: var(--green-light);
       color: var(--green-dark);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-outline-slate {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      color: var(--ink);
       font-family: inherit;
       font-size: 13px;
       font-weight: 700;
@@ -670,6 +687,12 @@
       margin-top: 10px;
     }
 
+    .settings-divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 16px 0;
+    }
+
     .list-item {
       display: flex;
       align-items: flex-start;
@@ -756,8 +779,8 @@
       background: #ffffff;
       border-top: 1px solid var(--line);
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      padding: 8px 6px 10px;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 8px 4px 10px;
       z-index: 30;
     }
 
@@ -766,7 +789,7 @@
       background: transparent;
       color: var(--muted);
       font-family: inherit;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       display: flex;
       flex-direction: column;
@@ -781,6 +804,16 @@
   </style>
 </head>
 <body>
+  <!-- ================= SPLASH SCREEN SAAT REFRESH SESI ================= -->
+  <div id="bootSplash" class="boot-splash hidden">
+    <div class="pondok-logo-wrap" style="margin:0;">
+      <img class="ponpes-logo-img" src="https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png" alt="Logo PPS. NU Raden Keunyeup" />
+    </div>
+    <div style="font-size:16px; font-weight:800;">PPS. NU Raden Keunyeup</div>
+    <div class="boot-spinner"></div>
+    <div style="font-size:12.5px; color:rgba(255,255,255,0.9); font-weight:600;">Menyiapkan portal wali santri...</div>
+  </div>
+
   <!-- ================= HALAMAN LOGIN FRESH ================= -->
   <section id="loginScreen" class="login-screen">
     <div>
@@ -821,6 +854,19 @@
 
     <footer class="login-footer">Powered by Sohad Studio</footer>
   </section>
+
+  <script>
+    try {
+      var rawSess = localStorage.getItem('sohad_wali_session_rk');
+      if (rawSess) {
+        var parsedSess = JSON.parse(rawSess);
+        if (parsedSess && parsedSess.nis && parsedSess.pin) {
+          document.getElementById('loginScreen').classList.add('hidden');
+          document.getElementById('bootSplash').classList.remove('hidden');
+        }
+      }
+    } catch (_) {}
+  </script>
 
   <!-- ================= HALAMAN PORTAL WALI SANTRI ================= -->
   <div id="appShell" class="app-shell hidden">
@@ -879,16 +925,14 @@
           </div>
         </div>
 
-        <div class="action-row-2">
-          <button id="btnGoTopup" class="btn-outline-green" type="button">Isi Saldo</button>
-          <button id="btnWaPengurus" class="btn-outline-slate" type="button">Pengurus / Bendahara</button>
-        </div>
+        <button id="btnGoTopup" class="btn-outline-green" type="button">Isi Saldo</button>
       </div>
 
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="transaksi" type="button">Transaksi</button>
         <button class="tab-btn" data-tab="topup" type="button">Isi Saldo &amp; Status</button>
         <button class="tab-btn" data-tab="tagihan" type="button">Tagihan</button>
+        <button class="tab-btn" data-tab="bantuan" type="button">Bantuan</button>
         <button class="tab-btn" data-tab="profil" type="button">Profil</button>
       </div>
 
@@ -966,7 +1010,7 @@
         </form>
         <div id="topupAlert" class="alert-box"></div>
 
-        <hr style="border:none; border-top:1px solid var(--line); margin:16px 0;" />
+        <hr class="settings-divider" />
         <h3 style="font-size: 13px; font-weight: 800; margin-bottom: 6px;">Status Pengajuan Top-Up</h3>
         <div id="listTopup"></div>
       </div>
@@ -975,8 +1019,23 @@
         <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 6px;">Informasi Tagihan</h2>
         <p style="font-size: 12.5px; color: var(--muted); line-height: 1.55;">
           Total tunggakan tercatat saat ini: <strong id="tagihanInfoNominal" style="color:var(--ink);">Rp 0</strong>.
-          Untuk konfirmasi administrasi pondok, silakan hubungi pengurus atau bendahara.
+          Untuk konfirmasi administrasi pondok, silakan buka menu Bantuan untuk menghubungi pengurus atau bendahara.
         </p>
+      </div>
+
+      <div id="panelBantuan" class="card hidden">
+        <h2 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Bantuan &amp; Layanan Admin</h2>
+        <p style="font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 12px;">
+          Butuh bantuan konfirmasi top-up saldo, kendala kartu santri, pengaturan limit harian, atau pertanyaan administrasi pondok? Silakan hubungi pengurus / bendahara melalui WhatsApp resmi.
+        </p>
+        <div class="list-item" style="padding-top:4px; margin-bottom:12px;">
+          <div>
+            <div class="item-title">Admin / Bendahara Pondok</div>
+            <div class="item-sub">PPS. NU Raden Keunyeup • Layanan Wali Santri</div>
+          </div>
+          <span class="badge-soft">WhatsApp</span>
+        </div>
+        <button id="btnWaPengurus" class="btn-primary" type="button">Hubungi Pengurus / Bendahara (WA)</button>
       </div>
 
       <div id="panelProfil" class="card hidden">
@@ -1001,6 +1060,36 @@
           <span class="item-sub">Status Kartu</span>
           <span id="detailStatus" class="item-title">AKTIF</span>
         </div>
+
+        <hr class="settings-divider" />
+        <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Limit Jajan Harian</h3>
+        <form id="limitForm">
+          <div class="field-group">
+            <label class="field-label" for="inputNewLimit">Limit Jajan Harian Baru (Rp)</label>
+            <input id="inputNewLimit" class="input-control" type="number" min="0" step="1000" placeholder="Contoh: 15000" required />
+          </div>
+          <button id="btnSaveLimit" class="btn-primary" type="submit">Simpan Limit Harian</button>
+        </form>
+        <div id="limitAlert" class="alert-box"></div>
+
+        <hr class="settings-divider" />
+        <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px;">Pengaturan Ubah PIN Santri</h3>
+        <form id="pinForm">
+          <div class="field-group">
+            <label class="field-label" for="inputCurrentPin">PIN Saat Ini</label>
+            <input id="inputCurrentPin" class="input-control" type="password" placeholder="Masukkan PIN lama" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="inputNewPin">PIN Baru</label>
+            <input id="inputNewPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Minimal 4 karakter/angka" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="inputConfirmPin">Konfirmasi PIN Baru</label>
+            <input id="inputConfirmPin" class="input-control" type="password" minlength="4" maxlength="10" placeholder="Ulangi PIN baru" required />
+          </div>
+          <button id="btnSavePin" class="btn-primary" type="submit">Simpan PIN Baru</button>
+        </form>
+        <div id="pinAlert" class="alert-box"></div>
       </div>
     </main>
 
@@ -1013,6 +1102,9 @@
       </button>
       <button class="nav-item" data-nav="topup" type="button">
         <span>Isi Saldo</span>
+      </button>
+      <button class="nav-item" data-nav="bantuan" type="button">
+        <span>Bantuan</span>
       </button>
       <button class="nav-item" data-nav="profil" type="button">
         <span>Profil</span>
@@ -1029,6 +1121,7 @@
     const LOGO_DANA_URL = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Logo_dana_blue.svg/1920px-Logo_dana_blue.svg.png';
     const QRIS_BG_URL = 'https://raw.githubusercontent.com/sohadstudio/assets/refs/heads/main/background%20qris.png';
     const WALI_SESSION_KEY = 'sohad_wali_session_rk';
+    const WALI_CACHE_KEY = 'sohad_wali_cache_rk';
 
     /* KONFIGURASI & GENERATOR QRIS DINAMIS (DARI SOHAD STUDIO) */
     const QRIS_STATIS_SOHAD =
@@ -1091,6 +1184,32 @@
         }
       } catch (_) {}
       return null;
+    }
+
+    function saveWaliCache(data) {
+      try {
+        localStorage.setItem(WALI_CACHE_KEY, JSON.stringify(data));
+      } catch (_) {}
+    }
+
+    function clearWaliCache() {
+      try {
+        localStorage.removeItem(WALI_CACHE_KEY);
+      } catch (_) {}
+    }
+
+    function getSavedWaliCache() {
+      try {
+        const raw = localStorage.getItem(WALI_CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function hideBootSplash() {
+      const splash = document.getElementById('bootSplash');
+      if (splash) splash.classList.add('hidden');
     }
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
@@ -1384,9 +1503,18 @@
       document.querySelectorAll('.tab-btn').forEach((b) => {
         b.classList.toggle('active', b.dataset.tab === tabName);
       });
+      document.querySelectorAll('.nav-item').forEach((n) => {
+        const navTarget = n.dataset.nav;
+        const isActive =
+          (tabName === 'transaksi' && navTarget === 'beranda') ||
+          navTarget === tabName;
+        n.classList.toggle('active', isActive);
+      });
+
       document.getElementById('panelTransaksi').classList.toggle('hidden', tabName !== 'transaksi');
       document.getElementById('panelTopup').classList.toggle('hidden', tabName !== 'topup');
       document.getElementById('panelTagihan').classList.toggle('hidden', tabName !== 'tagihan');
+      document.getElementById('panelBantuan').classList.toggle('hidden', tabName !== 'bantuan');
       document.getElementById('panelProfil').classList.toggle('hidden', tabName !== 'profil');
     }
 
@@ -1450,9 +1578,10 @@
       const totalSaldo = Number(s.saldo || 0);
       const sisaJajan = typeof s.sisa_limit === 'number' ? s.sisa_limit : totalSaldo;
       const tunggakan = Number(s.tunggakan || 0);
+      const limitHarian = Number(s.limit_harian || 0);
 
       document.getElementById('valTotalSaldo').textContent = formatRp(totalSaldo);
-      document.getElementById('limitHarianInfo').textContent = 'Limit harian: ' + formatRp(s.limit_harian || 0);
+      document.getElementById('limitHarianInfo').textContent = 'Limit harian: ' + formatRp(limitHarian);
       document.getElementById('valSisaJajan').textContent = formatRp(sisaJajan);
       document.getElementById('valTunggakan').textContent = formatRp(tunggakan);
       document.getElementById('tagihanInfoNominal').textContent = formatRp(tunggakan);
@@ -1460,8 +1589,13 @@
       document.getElementById('detailNama').textContent = s.nama || '-';
       document.getElementById('detailNis').textContent = s.nis || '-';
       document.getElementById('detailKamar').textContent = s.kamar || '-';
-      document.getElementById('detailLimit').textContent = formatRp(s.limit_harian || 0);
+      document.getElementById('detailLimit').textContent = formatRp(limitHarian);
       document.getElementById('detailStatus').textContent = st;
+
+      const limitInput = document.getElementById('inputNewLimit');
+      if (limitInput && document.activeElement !== limitInput) {
+        limitInput.value = limitHarian > 0 ? limitHarian : '';
+      }
 
       const trxList = Array.isArray(data.riwayat) ? data.riwayat : [];
       const trxEl = document.getElementById('listTransaksi');
@@ -1522,18 +1656,36 @@
 
     async function autoLoginWali() {
       const saved = getSavedWaliSession();
-      if (!saved) return;
+      if (!saved) {
+        hideBootSplash();
+        document.getElementById('loginScreen').classList.remove('hidden');
+        return;
+      }
+
+      session = { nis: saved.nis, pin: saved.pin };
+      const cached = getSavedWaliCache();
+      if (cached && cached.santri) {
+        renderDashboard(cached);
+        hideBootSplash();
+        document.getElementById('appShell').classList.remove('hidden');
+      }
 
       const alertEl = document.getElementById('loginAlert');
       try {
         const data = await loadWaliData(saved.nis, saved.pin);
-        session = { nis: saved.nis, pin: saved.pin };
+        saveWaliCache(data);
+        hideBootSplash();
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appShell').classList.remove('hidden');
         alertEl.classList.remove('show');
         renderDashboard(data);
       } catch (_) {
         clearWaliSession();
+        clearWaliCache();
+        session = { nis: '', pin: '' };
+        hideBootSplash();
+        document.getElementById('appShell').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
       }
     }
 
@@ -1577,6 +1729,8 @@
         const data = await loadWaliData(nis, pin);
         session = { nis, pin };
         saveWaliSession(nis, pin);
+        saveWaliCache(data);
+        hideBootSplash();
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appShell').classList.remove('hidden');
         alertEl.classList.remove('show');
@@ -1626,6 +1780,7 @@
         document.getElementById('topupForm').reset();
         updatePaymentMethodView();
         const refreshed = await loadWaliData(session.nis, session.pin);
+        saveWaliCache(refreshed);
         renderDashboard(refreshed);
       } catch (err) {
         showAlert(alertEl, err.message, false);
@@ -1635,12 +1790,105 @@
       }
     });
 
+    document.getElementById('limitForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('limitAlert');
+      const btn = document.getElementById('btnSaveLimit');
+      const limitBaru = Number(document.getElementById('inputNewLimit').value || 0);
+
+      if (limitBaru < 0) {
+        showAlert(alertEl, 'Limit harian tidak boleh kurang dari 0.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'ubahLimitHarian',
+            nis: session.nis,
+            pin: session.pin,
+            limit_harian: limitBaru
+          })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'Gagal mengubah limit harian.');
+
+        showAlert(alertEl, json.message || 'Limit jajan harian berhasil diperbarui.', true);
+        const refreshed = await loadWaliData(session.nis, session.pin);
+        saveWaliCache(refreshed);
+        renderDashboard(refreshed);
+      } catch (err) {
+        showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Simpan Limit Harian';
+      }
+    });
+
+    document.getElementById('pinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('pinAlert');
+      const btn = document.getElementById('btnSavePin');
+      const pinLama = document.getElementById('inputCurrentPin').value.trim();
+      const pinBaru = document.getElementById('inputNewPin').value.trim();
+      const konfirmasiPin = document.getElementById('inputConfirmPin').value.trim();
+
+      if (pinLama !== session.pin) {
+        showAlert(alertEl, 'PIN saat ini tidak sesuai.', false);
+        return;
+      }
+      if (pinBaru.length < 4) {
+        showAlert(alertEl, 'PIN baru minimal 4 karakter.', false);
+        return;
+      }
+      if (pinBaru !== konfirmasiPin) {
+        showAlert(alertEl, 'Konfirmasi PIN baru tidak cocok.', false);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'ubahPin',
+            nis: session.nis,
+            pin: session.pin,
+            pin_lama: pinLama,
+            pin_baru: pinBaru
+          })
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.message || 'Gagal mengubah PIN santri.');
+
+        session = { nis: session.nis, pin: pinBaru };
+        saveWaliSession(session.nis, pinBaru);
+        document.getElementById('pinForm').reset();
+        showAlert(alertEl, json.message || 'PIN santri berhasil diperbarui.', true);
+        const refreshed = await loadWaliData(session.nis, session.pin);
+        saveWaliCache(refreshed);
+        renderDashboard(refreshed);
+      } catch (err) {
+        showAlert(alertEl, err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Simpan PIN Baru';
+      }
+    });
+
     document.getElementById('btnRefresh').addEventListener('click', async () => {
       if (!session.nis) return;
       const btn = document.getElementById('btnRefresh');
       btn.textContent = 'Memuat...';
       try {
         const data = await loadWaliData(session.nis, session.pin);
+        saveWaliCache(data);
         renderDashboard(data);
       } finally {
         btn.textContent = 'Muat Ulang';
@@ -1660,13 +1908,18 @@
     document.getElementById('btnLogout').addEventListener('click', () => {
       clearQRISWali();
       clearWaliSession();
+      clearWaliCache();
+      hideBootSplash();
       session = { nis: '', pin: '' };
       document.getElementById('appShell').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('greetingTitle').textContent = 'Wali Santri';
       document.getElementById('loginForm').reset();
+      document.getElementById('limitForm').reset();
+      document.getElementById('pinForm').reset();
       document.getElementById('inputPin').type = 'password';
       updatePaymentMethodView();
+      switchTab('transaksi');
     });
 
     document.querySelectorAll('.tab-btn').forEach((btn) => {
@@ -1675,11 +1928,10 @@
 
     document.querySelectorAll('.nav-item').forEach((nav) => {
       nav.addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach((n) => n.classList.remove('active'));
-        nav.classList.add('active');
         const target = nav.dataset.nav;
         if (target === 'tagihan') switchTab('tagihan');
         else if (target === 'topup') switchTab('topup');
+        else if (target === 'bantuan') switchTab('bantuan');
         else if (target === 'profil') switchTab('profil');
         else switchTab('transaksi');
       });
