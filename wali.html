@@ -608,6 +608,30 @@
       flex-shrink: 0;
     }
 
+    .qris-preview-box {
+      margin-top: 10px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .qris-preview-box img {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto 8px;
+    }
+
+    .qris-caption {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
     .rincian-box {
       margin-top: 12px;
       padding-top: 10px;
@@ -913,6 +937,11 @@
               <button id="btnCopyRek" class="btn-copy-rek" type="button">Salin</button>
             </div>
 
+            <div id="qrisBox" class="qris-preview-box hidden">
+              <img id="qrisImg" src="" alt="QRIS Pembayaran" />
+              <div class="qris-caption">Scan QRIS sesuai Total Bayar • a.n. Shofwatul Hady</div>
+            </div>
+
             <div class="rincian-box">
               <div class="rincian-row">
                 <span>Saldo Top-Up Santri</span>
@@ -1001,12 +1030,13 @@
     const WA_PENGURUS = '6285111311421';
     const LOGO_PONPES_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png';
     const LOGO_PONPES_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/Logo%20NU%20Raden%20Keunyeup%20Transparan.png?raw=true';
+    const QRIS_IMG_URL = 'https://raw.githubusercontent.com/sohadstudio/Assets/main/shofwatul%20hady.png';
+    const QRIS_IMG_FALLBACK = 'https://github.com/sohadstudio/Assets/blob/main/shofwatul%20hady.png?raw=true';
 
     let session = { nis: '', pin: '' };
 
     const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
-    // Biaya admin Rp 2.500 untuk setiap kelipatan Rp 50.000
     function hitungBiayaAdmin(nominal) {
       const n = Math.max(0, Number(nominal || 0));
       if (n <= 0) return 0;
@@ -1028,6 +1058,8 @@
       const metode = document.getElementById('topupMetode').value;
       const titleEl = document.getElementById('paymentDetailTitle');
       const rekBox = document.getElementById('rekBox');
+      const qrisBox = document.getElementById('qrisBox');
+      const qrisImg = document.getElementById('qrisImg');
       const badgeEl = document.getElementById('rekBadge');
       const labelEl = document.getElementById('rekLabel');
       const numEl = document.getElementById('rekNumber');
@@ -1038,6 +1070,7 @@
 
       if (metode === 'Transfer Bank SeaBank') {
         rekBox.classList.remove('hidden');
+        qrisBox.classList.add('hidden');
         badgeEl.textContent = 'SEABANK';
         labelEl.textContent = 'Nomor Rekening SeaBank';
         numEl.textContent = '123456789';
@@ -1045,6 +1078,7 @@
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Transfer sesuai Total Bayar lalu konfirmasi ke pengurus.';
       } else if (metode === 'DANA / E-Wallet') {
         rekBox.classList.remove('hidden');
+        qrisBox.classList.add('hidden');
         badgeEl.textContent = 'DANA / E-WALLET';
         labelEl.textContent = 'Nomor Tujuan E-Wallet';
         numEl.textContent = '123456789';
@@ -1052,9 +1086,17 @@
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Sertakan nama santri di catatan transfer.';
       } else if (metode === 'QRIS') {
         rekBox.classList.add('hidden');
-        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Bayar sesuai Total Bayar dan lampirkan bukti bayar ke pengurus.';
+        qrisBox.classList.remove('hidden');
+        qrisImg.onerror = () => {
+          if (qrisImg.src !== QRIS_IMG_FALLBACK) {
+            qrisImg.src = QRIS_IMG_FALLBACK;
+          }
+        };
+        qrisImg.src = QRIS_IMG_URL;
+        noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Scan QRIS di atas sesuai Total Bayar lalu lampirkan bukti bayar ke pengurus.';
       } else {
         rekBox.classList.add('hidden');
+        qrisBox.classList.add('hidden');
         noteEl.textContent = 'Biaya admin otomatis dihitung Rp 2.500 untuk setiap kelipatan Rp 50.000. Serahkan uang tunai sesuai Total Bayar ke pengurus/bendahara.';
       }
 
